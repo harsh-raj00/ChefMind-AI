@@ -1,330 +1,376 @@
 <div align="center">
 
+<img src="docs/assets/banner.jpg" alt="ChefMind AI Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
+
 # 🍳 ChefMind AI
+### The Art of Culinary Intelligence · Transform Kitchen Scraps into Gourmet Creations
 
-**Turn whatever is in your fridge into a chef-quality recipe — by typing, talking, or snapping a photo.**
+[![CI Workflow](https://github.com/harsh-raj00/ChefMind-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/harsh-raj00/ChefMind-AI/actions/workflows/ci.yml)
+[![Node Version](https://img.shields.io/badge/Node.js-20%20%7C%2022-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Express](https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-F5A623?style=for-the-badge)](LICENSE)
 
-[![CI](https://github.com/harsh-raj00/ChefMind-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/harsh-raj00/ChefMind-AI/actions/workflows/ci.yml)
-[![Node.js](https://img.shields.io/badge/Node.js-20%20%7C%2022-339933?logo=node.js&logoColor=white)](https://nodejs.org)
-[![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)](https://expressjs.com)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
-[![Gemini](https://img.shields.io/badge/Google-Gemini-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#-license)
-
-[Features](#-features) · [Quick Start](#-quick-start) · [Architecture](#-architecture) · [API](#-api-at-a-glance) · [Deployment](#-deployment) · [Docs](#-documentation)
+<p align="center">
+  <a href="#-key-features"><b>Key Features</b></a> •
+  <a href="#-system-architecture"><b>Architecture</b></a> •
+  <a href="#-quick-start"><b>Quick Start</b></a> •
+  <a href="#-api-reference"><b>API Reference</b></a> •
+  <a href="#-security--hardening"><b>Security</b></a> •
+  <a href="#-deployment"><b>Deployment</b></a> •
+  <a href="docs/README.md"><b>Full Docs</b></a>
+</p>
 
 </div>
 
 ---
 
-## 📖 About
+## 🌟 Overview
 
-ChefMind AI is a full-stack cooking assistant. Tell it what ingredients you have and how you like to eat. It uses Google Gemini to write a complete recipe with measured ingredients, step-by-step instructions, timings, nutrition, substitutions and tips. You can save the recipe to your cookbook, change the number of servings, or ask follow-up questions about the dish.
+**ChefMind AI** is an intelligent, full-stack culinary assistant designed to solve daily mealtime decision paralysis and eliminate domestic food waste. By bridging multimodal computer vision, speech recognition, and generative AI with resilient culinary math, ChefMind turns raw pantry odds and ends into chef-grade, precisely measured recipes.
 
-The goal is simple: **less "what's for dinner?" and less food waste.**
-
-> [!NOTE]
-> Add your screenshots or a demo GIF here, for example `docs/screenshots/home.png`. A visual preview is the fastest way to get people interested in the project.
+Whether you **type** your ingredients, **speak** them aloud, or **snap a picture of your refrigerator shelf**, ChefMind inspects your pantry, accommodates dietary restrictions, respects custom cooking styles, and writes fully customized recipes in **English or Hindi (हिन्दी)**.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-| | Feature | What it does |
-| 🌐 | **Bilingual recipes (English & Hindi)** | Generate full recipes in English or Hindi (हिन्दी) in native Devanagari script for titles, units, ingredients, and instructions. |
-| 🧑‍🍳 | **Personalized cooking instructions** | Specify your exact preparation style, cookware, and custom spice level before the AI writes the recipe. |
-| 📸 | **Photo ingredient detection** | Upload up to 5 photos, or use your device camera. Gemini Vision lists the ingredients it sees. |
-| 🎙️ | **Voice input** | Say your ingredients aloud with the browser's speech recognition. Several languages are supported, such as `en-IN`. |
-| ✅ | **Review before cooking** | Check, edit or remove the detected ingredients before generating a recipe. Nothing is sent to the AI without your review. |
-| 🎛️ | **Personalization** | Choose the meal type, cuisine and diet so the recipe fits you. |
-| 📋 | **Rich recipes** | Each recipe includes ingredients, instructions, prep and cook times, difficulty, nutrition, dietary notes, substitutions and chef tips. |
-| ⚖️ | **Smart serving scaler** | Rescales quantities instantly in your browser, with no extra AI call. Salt and spices scale more gently than other ingredients, and amounts show as friendly fractions such as `1 1/4`. |
-| 💬 | **Recipe chat** | Ask follow-up questions like "Can I make this without an oven?" with the recipe as context. |
-| 📚 | **Personal cookbook** | Save, favourite and delete recipes, including custom ones you write yourself, with mobile-responsive card details. |
-| 🔐 | **Accounts** | JWT sign-in with bcrypt-hashed passwords. Your session is restored automatically when you return. |
-| 🛡️ | **Production hardening** | Three-tier rate limiting, security headers, a CORS allow-list, upload checks, health and readiness probes, and Gemini model fallback. |
+### 🌐 Native Bilingual Recipe Engine (English & हिन्दी)
+* **Devanagari Localized Output**: Seamlessly switches between English and authentic Hindi (`हिन्दी`). The AI crafts recipe titles, descriptions, units (e.g. *चम्मच*, *कटोरी*, *ग्राम*), preparation steps, chef tips, and substitutions in Devanagari script.
+* **Resilient Schema Integrity**: Deep-tier JSON validation ensures backend schema keys remain unified while delivering native linguistic experiences.
+* **Persistent Language State**: Recipes remember their source language when saved to your personal cookbook.
+
+### 🧑‍🍳 Pre-Generation Culinary Directives
+* **Custom Cooking Directives**: Guide the AI before generation begins—request specific appliances (e.g. *air fryer*, *cast-iron skillet*, *one-pot pressure cooker*), speed constraints (*under 20 minutes*), or culinary methods (*charred roast*, *steamed dumpling style*).
+* **Granular Heat Profiles**: Five distinct heat preferences from *Mild* and *Medium* to *Authentic Indian / Extra Hot*.
+
+### 📸 Multimodal Vision Pantry Detection
+* **Camera & Multi-Image Ingestion**: Capture live photos directly via your phone/laptop camera or upload up to 5 pantry photos simultaneously.
+* **Gemini Vision Analysis**: Leverages Gemini Vision with custom confidence thresholds to detect ingredients, flag uncertain items, and provide visual cooking tips.
+* **Human-in-the-Loop Confirmation**: Detected ingredients flow into an interactive review tray where you can rename, adjust quantities, add forgotten spices, or delete mistaken items before generating.
+
+### 🎙️ Hands-Free Voice Input
+* **Browser Speech Recognition**: Voice-to-text dictation with multi-language accent support (`en-IN`, `en-US`, `hi-IN`). Add multiple ingredients quickly without touching the screen with floury fingers.
+
+### ⚖️ Client-Side Serving Scaler with Culinary Math
+* **Zero Latency Scaling**: Scale servings instantly from 1 to 12 persons without invoking paid AI calls.
+* **Spice & Seasoning Dampening**: Prevents over-seasoning by dampening non-linear spices (salt, chilies, garam masala, saffron, cumin) during portion increases.
+* **Fractional Precision**: Displays natural culinary fractions like `1 1/2 cups` or `3/4 tsp` rather than clumsy decimals like `1.7500`.
+
+### 💬 In-Context AI Sous-Chef Chat
+* **Live Recipe Iteration**: Chat with an AI assistant that maintains complete awareness of the active recipe's exact ingredients, quantities, and steps.
+* **Recipe Evolution**: Request instant modifications (e.g., *"Make this dairy-free"*, *"I don't have butter, what can I substitute?"*). The assistant returns both an explanation and an updated, validated recipe object.
+
+### 📚 Responsive Personal Cookbook
+* **Cloud Persistence**: Save recipes to your MongoDB account with one click.
+* **Fast Filtering & Favorites**: Filter by favorite dishes, search by title or ingredients, and scale servings directly from saved cards.
+* **Engineered for Mobile (375px–430px)**: Single-column responsive layout, touch-friendly 44px hit-targets, inline SVG icons with tactile click feedback, and zero text overflow.
+
+---
+
+## 🏗 System Architecture
+
+ChefMind AI is built with clean separation of concerns, defensive validation layers, and resilient model fallbacks.
+
+### High-Level Topology
+
+```mermaid
+flowchart TB
+    User([👤 User / Browser])
+
+    subgraph Client ["🖥️ Client Application (React 19 + Vite)"]
+        direction TB
+        UI["⚛️ Responsive Single Page App"]
+        Speech["🎙️ Web Speech API"]
+        Camera["📷 MediaDevices Camera"]
+        Scaler["⚖️ Client-Side Serving Scaler"]
+        Storage[("💾 Token / Session Store")]
+        UI <--> Speech & Camera & Scaler & Storage
+    end
+
+    subgraph Gateway ["🛡️ Express API Gateway"]
+        direction TB
+        SecHeaders["🔒 Helmet Security Headers"]
+        Cors["🌐 Strict CORS Whitelist"]
+        Limiter["🚦 3-Tier IP Rate Limiters"]
+        AuthMiddleware["🔑 JWT Authentication & Isolation"]
+        SecHeaders --> Cors --> Limiter --> AuthMiddleware
+    end
+
+    subgraph Controllers ["⚙️ Backend Business Logic"]
+        direction TB
+        AuthCtrl["👤 Auth Controller (bcrypt + JWT)"]
+        IngCtrl["🥕 Ingredient & Vision Controller"]
+        RecCtrl["🍲 Recipe & Chat Controller"]
+    end
+
+    subgraph AI_Engine ["🤖 Multimodal AI Engine"]
+        direction TB
+        Chain["🔄 Fallback Chain Execution"]
+        M1["✨ Gemini 3.8 Flash"]
+        M2["⚡ Gemini 3.7 Flash"]
+        M3["🛡️ Gemini 3.5 Flash"]
+        Validator["📋 Structural Sanitizer & Redactor"]
+        Chain --> M1 -. fallback .-> M2 -. fallback .-> M3
+        M1 & M2 & M3 --> Validator
+    end
+
+    subgraph Database ["🍃 MongoDB Atlas"]
+        UsersCol[("Users Collection")]
+        RecipesCol[("Recipes Collection")]
+    end
+
+    User <==> UI
+    UI -- "REST API (JSON / Multipart Form)" --> Gateway
+    Gateway --> Controllers
+    Controllers --> AI_Engine
+    Controllers <== "Mongoose ODM" ==> Database
+```
+
+### The 3-Tier Gemini Fallback Chain
+Every generative request executes through a resilient fallback circuit. If a tier encounters rate limits (`429`), upstream downtime (`503`), or exceeds a **30-second timeout**, execution immediately cascades to the next stable model:
+
+```
+┌────────────────────────┐      fallback      ┌────────────────────────┐      fallback      ┌────────────────────────┐
+│  gemini-3.8-flash      │ ─────────────────► │  gemini-3.7-flash      │ ─────────────────► │  gemini-3.5-flash      │
+│  (Ultra-low latency)   │                    │  (High-reasoning)      │                    │  (Maximum resilience)  │
+└────────────────────────┘                    └────────────────────────┘                    └────────────────────────┘
+```
 
 ---
 
 ## 🧰 Tech Stack
 
-| Layer | Technology |
-|---|---|
-| **Frontend** | React 19, Vite 8, plain CSS, Web Speech API, MediaDevices (camera) |
-| **Backend** | Node.js (ES modules), Express 5, Multer, express-rate-limit |
-| **Database** | MongoDB Atlas via Mongoose 9 |
-| **AI** | Google Gemini REST API through native `fetch()` (no SDK) |
-| **Auth** | JSON Web Tokens + bcryptjs |
-| **Quality** | `node:test` backend suite, ESLint, GitHub Actions on Node 20 and 22 |
-
----
-
-## 🏗 Architecture
-
-### System overview
-
-```mermaid
-flowchart TB
-    U([👤 User]) --> UI
-
-    subgraph Client ["🖥️ Browser — React 19 + Vite"]
-        direction LR
-        UI["⚛️ SPA"]
-        SP["🎙️ Web Speech API"]
-        CAM["📷 Camera"]
-        SC["⚖️ Serving scaler"]
-        LS[("💾 localStorage<br/>JWT")]
-        UI <--> SP & CAM & SC & LS
-    end
-
-    UI -- "HTTPS · JSON / multipart · Bearer JWT" --> SEC
-
-    subgraph API ["⚙️ Node.js + Express 5"]
-        direction LR
-        SEC["🛡️ CORS +<br/>security headers"] --> RL["🚦 Rate limiters<br/>global · auth · AI"]
-        RL --> AU["🔑 JWT auth"] --> CT["🎯 Controllers<br/>auth · ingredients · recipes"]
-        CT --> GS["🤖 Gemini service<br/>fallback + checks"]
-    end
-
-    CT -- "Mongoose" --> DB[("🍃 MongoDB Atlas<br/>users · recipes")]
-    GS -- "fetch · 30 s timeout" --> GM["✨ Google Gemini<br/>text + vision"]
-```
-
-### How a recipe is made
-
-```mermaid
-flowchart LR
-    A["🥕 Add ingredients<br/>type · speak · photo"] --> B["👁️ Gemini Vision<br/>(photos only)"]
-    A --> C
-    B --> C["✅ Review & edit"]
-    C --> D["🎛️ Preferences<br/>meal · cuisine · diet"]
-    D --> E["✨ Gemini writes recipe"]
-    E --> F["📋 Recipe card<br/>auto-saved"]
-    F --> G["⚖️ Scale servings"]
-    F --> H["💬 Chat & tweak"]
-    H -->|save version| I[("📚 Cookbook")]
-    F --> I
-```
-
-### The Gemini fallback chain
-
-Every AI request tries several models in order. If a model is overloaded, rate-limited or slower than **30 s**, the request moves to the next one:
-
-```
-gemini-3.8-flash  ──►  gemini-3.7-flash  ──►  gemini-3.5-flash
-```
-
-The backend checks every model response before using it. AI output is never trusted unchecked.
-
-📐 **More diagrams** are in [docs/architecture.md](docs/architecture.md): frontend components, the middleware pipeline, sequence diagrams for generation, vision, chat and auth, the ER data model, and the security layers. The full list is in the [docs diagram index](docs/README.md#diagram-index).
+| Layer | Technology | Key Modules & Libraries |
+|---|---|---|
+| **Frontend** | **React 19** · **Vite 8** | Modern Vanilla CSS, Web Speech API, MediaDevices Camera API, Lucide-style SVG icons |
+| **Backend** | **Node.js 20/22** · **Express 5** | Native ES Modules, Multer (multipart), Express Rate Limit, Native `fetch` |
+| **Database** | **MongoDB Atlas** | Mongoose 9 ODM with schema validation, indexes, and strict user-scoping |
+| **Artificial Intelligence** | **Google Gemini REST API** | Multimodal Vision & Text Models (`gemini-3.8-flash`, `gemini-3.7-flash`, `gemini-3.5-flash`) |
+| **Security & Auth** | **JWT** · **bcryptjs** | Custom security headers, CORS protection, multi-tier rate limiters, magic byte inspection |
+| **Testing & CI/CD** | **node:test** · **GitHub Actions** | Automated CI pipeline on Node 20 & 22 (unit tests, ESLint, production build) |
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+* **Node.js**: `v20.0.0` or higher (verified on Node 20 & 22)
+* **npm**: `v9.0.0` or higher
+* **MongoDB**: A free [MongoDB Atlas](https://www.mongodb.com/atlas) connection URI (or local `mongod`)
+* **Gemini API Key**: From [Google AI Studio](https://aistudio.google.com/app/apikey)
 
-- **Node.js 20+** and npm
-- A **MongoDB Atlas** cluster (the free tier is enough) or a local MongoDB
-- A **Google Gemini API key** from [Google AI Studio](https://aistudio.google.com/app/apikey)
-
-### 1. Clone and install
-
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/harsh-raj00/ChefMind-AI.git
 cd ChefMind-AI
-
-npm install                    # backend dependencies
-npm --prefix frontend install  # frontend dependencies
 ```
 
-### 2. Configure the environment
+### 2. Install Dependencies
+```bash
+# Install backend dependencies
+npm install
 
+# Install frontend dependencies
+npm --prefix frontend install
+```
+
+### 3. Setup Environment Variables
+Create your local `.env` from the provided template:
 ```bash
 cp .env.example .env
 ```
 
-Then open `.env` and fill in the values:
+Open `.env` in your editor and configure your secrets:
+```ini
+# Application Port & Mode
+PORT=3000
+NODE_ENV=development
+CLIENT_URL=http://localhost:5173
 
-| Variable | Required | Description |
-|---|:---:|---|
-| `MONGODB_URI` | ✅ | MongoDB connection string, including the database name |
-| `JWT_SECRET` | ✅ | 32+ random characters. Generate one with `openssl rand -hex 32` |
-| `GEMINI_API_KEY` | ✅ | Gemini API key. **Backend only, never expose it.** |
-| `PORT` | | API port (default `3000`) |
-| `NODE_ENV` | | `development` · `test` · `production` |
-| `CLIENT_URL` | | Comma-separated CORS allow-list (default dev: `http://localhost:5173`) |
-| `TRUST_PROXY` | | Set to `true` behind a reverse proxy. It is on automatically in production. |
-| `VITE_API_BASE_URL` | | Frontend only: the backend URL in production. Leave it empty in dev. |
+# Database & Security
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.example.mongodb.net/chefmind?retryWrites=true&w=majority
+JWT_SECRET=your_super_secret_at_least_32_characters_random_key
 
-> [!WARNING]
-> Anything prefixed with `VITE_` is bundled into public client code. Never put secrets there.
+# Google Gemini API
+GEMINI_API_KEY=AIzaSyYourActualGeminiApiKeyHere
+```
 
-### 3. Run it
+> [!NOTE]
+> During local development, the Vite dev server automatically proxies `/api` requests to `http://localhost:3000`, so no frontend `.env` is necessary.
 
-Open two terminals:
+### 4. Run Development Servers
+Start both backend and frontend concurrently in two terminal tabs:
 
 ```bash
-# Terminal 1 — API on http://localhost:3000 (auto-reloads)
+# Terminal 1: Backend API (runs on http://localhost:3000 with auto-reload)
 npm run dev:backend
 
-# Terminal 2 — App on http://localhost:5173
+# Terminal 2: React Frontend (runs on http://localhost:5173)
 npm run dev:frontend
 ```
 
-In development, Vite proxies `/api` to `localhost:3000`, so you don't need any CORS setup.
+Open your browser at **`http://localhost:5173`** to begin cooking!
 
 ---
 
-## 📜 Scripts
+## 📜 Available NPM Scripts
 
-| Command | Description |
+Run all root project commands with ease:
+
+| Command | Action |
 |---|---|
-| `npm start` | Start the API in production mode |
-| `npm run dev:backend` | Start the API with `node --watch` |
-| `npm run dev:frontend` | Start the Vite dev server |
-| `npm test` | Run the backend test suite (`node --test`) |
-| `npm run lint:frontend` | Lint the React code with ESLint |
-| `npm run build:frontend` | Build the frontend into `frontend/dist` |
+| `npm run dev:backend` | Starts the Express API server with native Node watch mode (`node --watch`) |
+| `npm run dev:frontend` | Starts Vite client server with Instant Hot Module Replacement (HMR) |
+| `npm test` | Runs the full 69-suite backend unit and integration test suite (`node:test`) |
+| `npm run lint:frontend` | Runs ESLint across all React JSX and utility files |
+| `npm run build:frontend` | Compiles the frontend into an optimized, minified production bundle in `frontend/dist` |
+| `npm start` | Launches the production Express API server |
 
 ---
 
-## 🔌 API at a Glance
+## 🔌 API Reference
 
-All responses follow the shape `{ success, ...data | message }`. 🔒 marks routes that need an `Authorization: Bearer <token>` header.
+All responses conform to the consistent format `{ success: true, ...data }` or `{ success: false, message: "..." }`.
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/register` | Create an account |
-| `POST` | `/api/auth/login` | Sign in and receive a JWT |
-| `GET` | `/api/auth/me` 🔒 | Get the current user |
-| `POST` | `/api/ingredients/text` | Parse and validate a text ingredient list |
-| `POST` | `/api/ingredients/image-analyze` 🔒 | Detect ingredients in up to 5 images (JPG/PNG/WebP, 5 MB each) |
-| `POST` | `/api/recipes/generate` 🔒 | Generate a recipe from ingredients and preferences |
-| `POST` | `/api/recipes/chat` 🔒 | Chat about an unsaved recipe |
-| `POST` | `/api/recipes/:id/chat` 🔒 | Chat about a saved recipe |
-| `POST` | `/api/recipes/save` 🔒 | Save a custom recipe |
-| `GET` | `/api/recipes` 🔒 | List your cookbook |
-| `PATCH` | `/api/recipes/:id/favorite` 🔒 | Add or remove a favourite |
-| `DELETE` | `/api/recipes/:id` 🔒 | Delete a recipe |
-| `GET` | `/health` · `/health/ready` | Liveness and readiness probes (not rate-limited) |
+| Method | Endpoint | Auth | Description |
+|:---:|---|:---:|---|
+| `POST` | `/api/auth/register` | Public | Register new user account with email & password |
+| `POST` | `/api/auth/login` | Public | Authenticate user credentials and return signed JWT |
+| `GET` | `/api/auth/me` | 🔒 Bearer | Fetch profile and authentication state of current session |
+| `POST` | `/api/ingredients/text` | Public | Parse and clean a raw, comma-separated text ingredient string |
+| `POST` | `/api/ingredients/image-analyze` | 🔒 Bearer | Analyze up to 5 uploaded pantry photos via Gemini Vision |
+| `POST` | `/api/recipes/generate` | 🔒 Bearer | Generate a structured recipe (supports English & Hindi, custom instructions) |
+| `POST` | `/api/recipes/chat` | 🔒 Bearer | Conversational AI chat over an active, unsaved recipe |
+| `POST` | `/api/recipes/:id/chat` | 🔒 Bearer | Conversational AI chat scoped to a persisted recipe |
+| `POST` | `/api/recipes/save` | 🔒 Bearer | Save an AI-generated or user-customized recipe to user's cookbook |
+| `GET` | `/api/recipes` | 🔒 Bearer | Retrieve all recipes owned by the authenticated user |
+| `PATCH` | `/api/recipes/:id/favorite` | 🔒 Bearer | Toggle favorite bookmark on a recipe card |
+| `DELETE` | `/api/recipes/:id` | 🔒 Bearer | Permanently delete a recipe from the user's cookbook |
+| `GET` | `/health` | Public | Liveness probe returning process uptime and timestamp |
+| `GET` | `/health/ready` | Public | Readiness probe checking active MongoDB database connectivity |
 
-Full request and response examples are in [docs/api.md](docs/api.md).
-
----
-
-## 🔐 Security
-
-- **Rate limiting** (per IP, 15-minute window): 15 requests for auth routes · 25 for AI routes · 300 for general API routes
-- **Passwords** are hashed with bcrypt. **JWTs** are checked on every protected route, and every recipe query is scoped to the user who owns it.
-- **Headers**: `X-Frame-Options: DENY`, `nosniff`, a strict referrer policy, COOP, and HSTS in production
-- **CORS** only allows the origins listed in `CLIENT_URL`
-- **Input limits**: 1 MB JSON bodies; uploads must be JPG, PNG or WebP, at most 5 MB each and 5 files total
-- **Secrets stay on the server.** The Gemini key never reaches the browser.
-
-> [!IMPORTANT]
-> **Known trade-off:** the JWT is stored in `localStorage` for simplicity. That makes it readable by any XSS. Moving to `HttpOnly` cookies is on the roadmap.
+*Complete request/response JSON payloads and error code specifications are documented in [`docs/api.md`](docs/api.md).*
 
 ---
 
-## 🧪 Testing
+## 🛡️ Security & Hardening
+
+* **Multi-Tier IP Rate Limiting**:
+  - `authLimiter`: 15 requests per 15 minutes (mitigates brute-force attacks)
+  - `aiLimiter`: 25 requests per 15 minutes (protects AI token quotas from abuse)
+  - `apiLimiter`: 300 general requests per 15 minutes
+* **Strict Payload Validation**: 1MB payload ceiling on JSON bodies. Uploaded photos are strictly bounded to 5MB per file, 15MB total request size, max 5 images, and validated using MIME magic bytes (`image/jpeg`, `image/png`, `image/webp`).
+* **Header Fortification**: Emits `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security` (in production), and restrictive Cross-Origin Resource Policies.
+* **Sensitive Data Redaction**: Automatic sanitization on all outbound error responses prevents raw Gemini API keys, internal absolute paths, or database stack traces from leaking to clients.
+* **Strict Ownership Scoping**: Every database query verifies `userId: req.user.userId`. Users cannot inspect, modify, chat with, or delete recipes belonging to other accounts.
+
+---
+
+## 🧪 Testing & Continuous Integration
+
+ChefMind AI uses Node's built-in, zero-dependency `node:test` framework for deterministic, blisteringly fast tests:
 
 ```bash
 npm test
 ```
 
-The backend suite uses Node's built-in test runner. It covers **auth, ingredients, image confirmation, recipe generation, chat and security**. Gemini is mocked, so tests never use your API quota.
+```text
+✔ validateAndSanitizeRecipeData: Validates full structured recipe output and sanitizes missing fields
+✔ Serving Scaler Utility: Correctly formats quantities and handles fractional values
+✔ Serving Scaler Utility: Dampens salt and spice scaling when scaling up to protect dishes
+✔ Recipes API: Generates recipe in Hindi and passes language to Gemini prompt and database
+✔ Ingredients Image API: Rejects individual file exceeding 5MB limit with 400 Bad Request
+✔ Error Sanitization Security: Sensitive API keys and internal file paths are redacted in error responses
+...
+ℹ tests 69
+ℹ pass 69
+ℹ fail 0
+```
 
-On every push and pull request to `main`, [CI](.github/workflows/ci.yml) runs tests, lint and a production build on Node **20.x and 22.x**.
+Every commit and pull request to `main` triggers our automated [GitHub Actions CI Workflow](.github/workflows/ci.yml) which validates the backend tests, frontend ESLint quality, and client production build across **Node.js 20 and Node.js 22**.
 
 ---
 
-## 📁 Project Structure
+## ☁️ Deployment Guide
+
+ChefMind AI is engineered to deploy cleanly as a modern decoupled full-stack application:
+
+| Component | Recommended Hosts | Build & Runtime Configuration |
+|---|---|---|
+| **Backend API** | [Render](https://render.com) · [Railway](https://railway.app) · [Fly.io](https://fly.io) | Start Command: `npm start`<br/>Environment: `NODE_ENV=production`, `PORT`, `MONGODB_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `CLIENT_URL` |
+| **Frontend SPA** | [Vercel](https://vercel.com) · [Netlify](https://netlify.com) · [Cloudflare Pages](https://pages.cloudflare.com) | Root Directory: `frontend`<br/>Build Command: `npm run build`<br/>Output Directory: `dist`<br/>Environment: `VITE_API_BASE_URL=https://your-backend.onrender.com` |
+
+*Step-by-step production setup, custom domain routing, and MongoDB Atlas IP whitelisting are detailed in [`docs/deployment.md`](docs/deployment.md).*
+
+---
+
+## 📁 Repository Structure
 
 ```
 ChefMind-AI/
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # GitHub Actions CI matrix (Node 20 & 22)
 ├── backend/
-│   ├── server.js            # Entry point: loads env, connects DB, starts server
-│   ├── app.js               # Express app: middleware, routes, error handling
-│   ├── db.js                # Mongoose connection
-│   ├── controllers/         # auth · ingredient · recipe logic
-│   ├── middleware/          # JWT auth · rate limiters · Multer uploads
-│   ├── models/              # User · Recipe schemas
-│   ├── routes/              # /api/auth · /api/ingredients · /api/recipes
-│   ├── services/
-│   │   └── geminiService.js # Gemini calls, fallback chain, response checks
-│   └── tests/               # node:test suites
+│   ├── controllers/             # auth · ingredient · recipe business logic
+│   ├── middleware/              # JWT auth · rate limiters · file upload validators
+│   ├── models/                  # Mongoose models (User, Recipe)
+│   ├── routes/                  # Express route routers
+│   ├── services/                # Gemini client, prompt templates, model fallback chain
+│   ├── tests/                   # 69 automated node:test suites
+│   ├── app.js                   # Express application setup
+│   └── server.js                # Server bootstrap & database connection
 ├── frontend/
-│   ├── public/              # favicon, SPA _redirects
-│   └── src/
-│       ├── components/      # Hero, IngredientSection, CameraCaptureModal,
-│       │                    # IngredientConfirmation, RecipeResult, RecipeChat, Cookbook…
-│       ├── services/        # API clients (auth, ingredients, recipes)
-│       ├── utils/
-│       │   └── recipeScaler.js
-│       ├── App.jsx  Auth.jsx  main.jsx
-├── docs/                    # api.md · architecture.md · deployment.md
-├── .github/workflows/ci.yml
-└── .env.example
+│   ├── public/                  # Favicon & SPA _redirects rule
+│   ├── src/
+│   │   ├── components/          # React components (Cookbook, Hero, RecipeResult, etc.)
+│   │   ├── services/            # Client API abstraction layer (auth, recipes, ingredients)
+│   │   ├── utils/               # recipeScaler math & formatting helpers
+│   │   ├── App.jsx              # Main app view & state workflow
+│   │   ├── Auth.jsx             # Authentication modal
+│   │   └── App.css              # Custom responsive stylesheet & animations
+│   ├── index.html               # SPA HTML shell
+│   └── vite.config.js           # Vite development server & reverse proxy
+├── docs/                        # Architecture, API, and Deployment documentation
+│   └── assets/                  # High-resolution banners and diagrams
+├── .env.example                 # Sanitized environment template
+├── LICENSE                      # MIT Open Source License
+└── package.json                 # Workspace scripts & dependencies
 ```
-
----
-
-## ☁️ Deployment
-
-ChefMind AI deploys as **two separate services**:
-
-| Part | Suggested hosts | Notes |
-|---|---|---|
-| **Backend** | Render · Railway · Fly.io | Start command `npm start`. Set `NODE_ENV=production`, the secrets, and `CLIENT_URL` to your frontend URL. Use `/health/ready` for health checks. |
-| **Frontend** | Vercel · Netlify · Cloudflare Pages | Root `frontend`, build `npm run build`, output `dist`. Set `VITE_API_BASE_URL` to your backend URL. `public/_redirects` handles SPA routing. |
-
-In MongoDB Atlas, allow your backend's IP under *Network Access*. Step-by-step instructions are in [docs/deployment.md](docs/deployment.md).
 
 ---
 
 ## 🗺 Roadmap
 
-- [ ] Move auth tokens to `HttpOnly` cookies with refresh tokens
-- [ ] Weekly meal planner and auto-generated shopping list
-- [ ] Pantry tracking with expiry reminders to cut food waste further
-- [ ] Shareable public recipe links
-- [ ] Frontend component tests and end-to-end tests (Playwright)
-- [ ] PWA / offline cookbook
+- [ ] **Meal Planner Calendar**: Weekly multi-meal scheduler with auto-compiled grocery lists.
+- [ ] **Smart Pantry Inventory**: Real-time pantry tracker with ingredient expiration notifications.
+- [ ] **Social Share Links**: Public, read-only recipe links with OpenGraph rich preview cards.
+- [ ] **Offline PWA Support**: ServiceWorker caching for instant cookbook access in no-connectivity kitchens.
+- [ ] **HttpOnly Cookie Migration**: Transitioning JWT storage from localStorage to secure `SameSite=Strict` cookies.
 
 ---
 
-## 📚 Documentation
+## 👨‍💻 Author
 
-| Doc | Contents |
-|---|---|
-| [docs/api.md](docs/api.md) | Every endpoint, with request and response examples and error codes |
-| [docs/architecture.md](docs/architecture.md) | System design, request lifecycle and data models |
-| [docs/deployment.md](docs/deployment.md) | Production deployment guide, verification and troubleshooting |
-| [docs/README.md](docs/README.md) | Docs index and diagram catalogue |
+<div align="center">
 
----
+**Harsh Raj**
 
-## 🤝 Contributing
+[![GitHub](https://img.shields.io/badge/GitHub-harsh--raj00-181717?style=flat-square&logo=github)](https://github.com/harsh-raj00)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visit%20Site-2ea44f?style=flat-square&logo=safari)](https://github.com/harsh-raj00)
 
-1. Fork the repo and create a branch: `git checkout -b feature/amazing-idea`
-2. Make your changes, then check that `npm test`, `npm run lint:frontend` and `npm run build:frontend` all pass
-3. Commit with a clear message and open a pull request against `main`
+*Crafted with passion, modern engineering standards, and culinary curiosity.*
 
-Bug reports and feature ideas are welcome in [Issues](https://github.com/harsh-raj00/ChefMind-AI/issues).
+⭐ **Found ChefMind AI helpful? Please give this repository a star on GitHub!**
+
+</div>
 
 ---
 
 ## 📄 License
 
-Released under the **MIT License**. See [`LICENSE`](LICENSE).
-
-<div align="center">
-
-Built with ❤️ and 🧄 by **Harsh Raj**
-
-⭐ If ChefMind AI saved your dinner, consider [giving the repo a star](https://github.com/harsh-raj00/ChefMind-AI)!
-
-</div>
+This project is open-source software licensed under the **[MIT License](LICENSE)**.
