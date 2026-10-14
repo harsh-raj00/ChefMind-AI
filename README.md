@@ -108,9 +108,11 @@ flowchart TB
         direction TB
         Chain["🔄 Intelligent Provider Cascade"]
         subgraph Groq_Tier ["⚡ Primary: Groq Cloud (Ultra-Fast)"]
-            G1["Llama 3.3 70B Versatile"]
-            G2["Llama 3.1 8B Instant"]
-            GV["Llama 3.2 11B Vision"]
+            G1["openai/gpt-oss-120b (500 t/s)"]
+            G2["llama-3.3-70b-versatile"]
+            G3["openai/gpt-oss-20b (1000 t/s)"]
+            G4["llama-3.1-8b-instant"]
+            GV["llama-3.2-11b-vision"]
         end
         subgraph Gemini_Tier ["🛡️ Fallback: Google Gemini API"]
             M1["Gemini 3.8 Flash"]
@@ -136,15 +138,17 @@ flowchart TB
 
 ### ⚡ Dual-Engine AI Cascade: Groq (Primary) ➔ Google Gemini (Fallback)
 ChefMind AI uses an intelligent dual-engine architecture prioritizing blisteringly fast inference speeds and zero-downtime reliability:
-1. **Primary Provider (Groq Cloud):** Dispatches requests to Groq's low-latency inference engine (`llama-3.3-70b-versatile` / `llama-3.1-8b-instant` for structured recipe generation and chef chat, `llama-3.2-11b-vision-preview` for multi-modal pantry vision) with native JSON mode and 25-second timeouts.
+1. **Primary Provider (Groq Cloud):** Dispatches requests to Groq's high-speed LPU inference engine (`openai/gpt-oss-120b` @ 500 t/s primary, with `llama-3.3-70b-versatile`, `openai/gpt-oss-20b` @ 1,000 t/s, and `llama-3.1-8b-instant` failovers; `llama-3.2-11b-vision-preview` for multi-modal pantry vision) with native JSON mode and 25-second timeouts.
 2. **Resilient Fallback (Google Gemini API):** If Groq encounters rate limits (`429`), upstream load (`503`), network timeouts, or unconfigured keys, ChefMind immediately and invisibly cascades to Google Gemini (`gemini-3.8-flash` ➔ `gemini-3.7-flash` ➔ `gemini-3.5-flash`), guaranteeing 100% operational availability.
 
 ```
 ┌──────────────────────────────────────┐      fallback on 429/503/timeout      ┌──────────────────────────────────────┐
 │  ⚡ Groq Cloud (Primary Engine)      │ ────────────────────────────────────► │  🛡️ Google Gemini (Fallback Engine)  │
-│  • llama-3.3-70b-versatile (Text)    │                                       │  • gemini-3.8-flash (Ultra-low lat)  │
-│  • llama-3.1-8b-instant (Fast Fail)  │                                       │  • gemini-3.7-flash (Reasoning)      │
-│  • llama-3.2-11b-vision (Multi-Image)│                                       │  • gemini-3.5-flash (Resilience)     │
+│  • openai/gpt-oss-120b (500 t/s)     │                                       │  • gemini-3.8-flash (Ultra-low lat)  │
+│  • llama-3.3-70b-versatile (Reason)  │                                       │  • gemini-3.7-flash (Reasoning)      │
+│  • openai/gpt-oss-20b (1,000 t/s)    │                                       │  • gemini-3.5-flash (Resilience)     │
+│  • llama-3.1-8b-instant (Fast Fail)  │                                       │                                      │
+│  • llama-3.2-11b-vision (Multi-Image)│                                       │                                      │
 └──────────────────────────────────────┘                                       └──────────────────────────────────────┘
 ```
 
@@ -157,7 +161,7 @@ ChefMind AI uses an intelligent dual-engine architecture prioritizing blistering
 | **Frontend** | **React 19** · **Vite 8** | Modern Vanilla CSS, Web Speech API, MediaDevices Camera API, Lucide-style SVG icons |
 | **Backend** | **Node.js 20/22** · **Express 5** | Native ES Modules, Multer (multipart), Express Rate Limit, Native `fetch` |
 | **Database** | **MongoDB Atlas** | Mongoose 9 ODM with schema validation, indexes, and strict user-scoping |
-| **Artificial Intelligence** | **Groq Cloud** & **Google Gemini** | Groq (`llama-3.3-70b-versatile`, `llama-3.1-8b-instant`, `llama-3.2-11b-vision-preview`) with automatic fallback to Gemini (`3.8/3.7/3.5 Flash`) |
+| **Artificial Intelligence** | **Groq Cloud** & **Google Gemini** | Groq (`openai/gpt-oss-120b`, `llama-3.3-70b`, `openai/gpt-oss-20b`, `llama-3.1-8b`, `llama-3.2-vision`) with fallback to Gemini (`3.8/3.7/3.5 Flash`) |
 | **Security & Auth** | **JWT** · **bcryptjs** | Custom security headers, CORS protection, multi-tier rate limiters, magic byte inspection |
 | **Testing & CI/CD** | **node:test** · **GitHub Actions** | Automated CI pipeline on Node 20 & 22 (70 unit & integration tests, ESLint, production build) |
 

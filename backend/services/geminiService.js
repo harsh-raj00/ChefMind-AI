@@ -1,5 +1,9 @@
-const GROQ_PRIMARY_MODEL = "llama-3.3-70b-versatile";
-const GROQ_FALLBACK_MODELS = ["llama-3.1-8b-instant"];
+const GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b";
+const GROQ_FALLBACK_MODELS = [
+  "llama-3.3-70b-versatile",
+  "openai/gpt-oss-20b",
+  "llama-3.1-8b-instant",
+];
 const GROQ_VISION_MODELS = ["llama-3.2-11b-vision-preview", "llama-3.2-90b-vision-preview"];
 
 const GEMINI_PRIMARY_MODEL = "gemini-3.8-flash";
