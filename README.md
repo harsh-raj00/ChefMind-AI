@@ -17,7 +17,8 @@
   <a href="#-system-architecture"><b>Architecture</b></a> •
   <a href="#-tech-stack"><b>Tech Stack</b></a> •
   <a href="#-quick-start"><b>Quick Start</b></a> •
-  <a href="#-security--hardening"><b>Security</b></a>
+  <a href="#-security--hardening"><b>Security</b></a> •
+  <a href="#-future-improvements"><b>Roadmap</b></a>
 </p>
 
 </div>
@@ -259,13 +260,20 @@ ChefMind-AI/
 
 ---
 
-## 🗺 Roadmap
+## 🚀 Future Improvements
 
-- [ ] **Meal Planner Calendar**: Weekly multi-meal scheduler with auto-compiled grocery lists.
-- [ ] **Smart Pantry Inventory**: Real-time pantry tracker with ingredient expiration notifications.
-- [ ] **Social Share Links**: Public, read-only recipe links with OpenGraph rich preview cards.
-- [ ] **Offline PWA Support**: ServiceWorker caching for instant cookbook access in no-connectivity kitchens.
-- [ ] **HttpOnly Cookie Migration**: Transitioning JWT storage from localStorage to secure `SameSite=Strict` cookies.
+1. **Nutrition Estimation:** Display estimated calories, protein, carbohydrates, fats, and fiber per serving using a reliable nutrition database or API. Recalculate nutrition when ingredients or serving sizes change.
+2. **Smart Ingredient Substitution:** Suggest alternatives for unavailable ingredients while preserving dietary preferences. Automatically update quantities, cooking instructions, and nutrition estimates.
+3. **AI Dietitian & Personalized Recommendations:** Recommend recipes based on dietary preferences, nutrition goals, allergies, and fitness objectives. Provide daily nutrition summaries without presenting AI suggestions as medical advice.
+4. **Weekly Meal Planner:** Generate personalized seven-day meal plans based on cuisine, budget, servings, available ingredients, and dietary requirements. Generate a combined shopping list with consolidated quantities.
+5. **Google Health Integration:** Explore Google Health Connect on Android to use authorized activity and health data for personalized meal recommendations, subject to supported APIs and user permissions.
+6. **Agentic AI with LangGraph:** Implement specialized agents for ingredient analysis, recipe planning, nutrition analysis, ingredient substitution, and dietary validation. Orchestrate them using shared state, conditional workflows, validation, and bounded retries.
+7. **Nutrition Knowledge Base (RAG):** Retrieve nutrition facts from trusted sources and use them to provide evidence-based explanations.
+8. **AI Observability:** Monitor LLM latency, token usage, API costs, failures, agent execution traces, and recipe quality.
+9. **Smart Shopping:** Optimize shopping lists based on existing ingredients, grocery budgets, ingredient reuse, and estimated prices.
+
+> [!TIP]
+> **Implementation Guidelines:** Prioritize nutrition accuracy by using a reliable nutrition database/API instead of relying entirely on LLM calculations. Implement features incrementally, preserve existing functionality, validate dietary constraints, and evaluate each feature before deployment.
 
 ---
 
