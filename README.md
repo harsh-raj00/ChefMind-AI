@@ -17,11 +17,10 @@
 <p align="center">
   <a href="#-key-features"><b>Key Features</b></a> •
   <a href="#-system-architecture"><b>Architecture</b></a> •
+  <a href="#-tech-stack"><b>Tech Stack</b></a> •
   <a href="#-quick-start"><b>Quick Start</b></a> •
-  <a href="#-api-reference"><b>API Reference</b></a> •
   <a href="#-security--hardening"><b>Security</b></a> •
-  <a href="#-deployment"><b>Deployment</b></a> •
-  <a href="docs/README.md"><b>Full Docs</b></a>
+  <a href="docs/README.md"><b>API & Docs ↗</b></a>
 </p>
 
 </div>
@@ -232,78 +231,40 @@ Run all root project commands with ease:
 
 ---
 
-## 🔌 API Reference
+## 🔌 API Reference & Endpoints
 
-All responses conform to the consistent format `{ success: true, ...data }` or `{ success: false, message: "..." }`.
+ChefMind AI exposes 12 production-hardened REST endpoints across authentication, multi-modal ingredient vision, structured recipe generation, and recipe chat.
 
-| Method | Endpoint | Auth | Description |
-|:---:|---|:---:|---|
-| `POST` | `/api/auth/register` | Public | Register new user account with email & password |
-| `POST` | `/api/auth/login` | Public | Authenticate user credentials and return signed JWT |
-| `GET` | `/api/auth/me` | 🔒 Bearer | Fetch profile and authentication state of current session |
-| `POST` | `/api/ingredients/text` | Public | Parse and clean a raw, comma-separated text ingredient string |
-| `POST` | `/api/ingredients/image-analyze` | 🔒 Bearer | Analyze up to 5 uploaded pantry photos via Gemini Vision |
-| `POST` | `/api/recipes/generate` | 🔒 Bearer | Generate a structured recipe (supports English & Hindi, custom instructions) |
-| `POST` | `/api/recipes/chat` | 🔒 Bearer | Conversational AI chat over an active, unsaved recipe |
-| `POST` | `/api/recipes/:id/chat` | 🔒 Bearer | Conversational AI chat scoped to a persisted recipe |
-| `POST` | `/api/recipes/save` | 🔒 Bearer | Save an AI-generated or user-customized recipe to user's cookbook |
-| `GET` | `/api/recipes` | 🔒 Bearer | Retrieve all recipes owned by the authenticated user |
-| `PATCH` | `/api/recipes/:id/favorite` | 🔒 Bearer | Toggle favorite bookmark on a recipe card |
-| `DELETE` | `/api/recipes/:id` | 🔒 Bearer | Permanently delete a recipe from the user's cookbook |
-| `GET` | `/health` | Public | Liveness probe returning process uptime and timestamp |
-| `GET` | `/health/ready` | Public | Readiness probe checking active MongoDB database connectivity |
-*All endpoints require standard application/json payloads (except multipart image upload) and return standardized JSON envelopes as described above.*
-
----
-
-## 🛡️ Security & Hardening
-
-* **Multi-Tier IP Rate Limiting**:
-  - `authLimiter`: 15 requests per 15 minutes (mitigates brute-force attacks)
-  - `aiLimiter`: 25 requests per 15 minutes (protects AI token quotas from abuse)
-  - `apiLimiter`: 300 general requests per 15 minutes
-* **Strict Payload Validation**: 1MB payload ceiling on JSON bodies. Uploaded photos are strictly bounded to 5MB per file, 15MB total request size, max 5 images, and validated using MIME magic bytes (`image/jpeg`, `image/png`, `image/webp`).
-* **Header Fortification**: Emits `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security` (in production), and restrictive Cross-Origin Resource Policies.
-* **Sensitive Data Redaction**: Automatic sanitization on all outbound error responses prevents raw Gemini API keys, internal absolute paths, or database stack traces from leaking to clients.
-* **Strict Ownership Scoping**: Every database query verifies `userId: req.user.userId`. Users cannot inspect, modify, chat with, or delete recipes belonging to other accounts.
+> 📖 **Full Endpoint Table & Schema Contracts:**
+> See [**`docs/README.md#api-reference`**](docs/README.md#-api-reference) for the complete list of routes, authentication requirements, JSON request/response formats, and HTTP status codes.
 
 ---
 
 ## 🧪 Testing & Continuous Integration
 
-ChefMind AI uses Node's built-in, zero-dependency `node:test` framework for deterministic, blisteringly fast tests:
+ChefMind AI maintains comprehensive test coverage across both frontend and backend using Node's zero-dependency `node:test` framework and GitHub Actions:
+
+- **Backend Suite**: **69 automated tests** covering authentication, Gemini vision ingestion, serving scaling calculations, recipe chat mutations, and error sanitization.
+- **Continuous Integration**: Automated GitHub Actions matrix testing against **Node.js 20 and Node.js 22** on every commit.
 
 ```bash
-npm test
+npm test                # Run 69 backend unit and integration tests
+npm run lint:frontend   # ESLint code style and quality check
+npm run build:frontend  # Validate client production bundle compilation
 ```
 
-```text
-✔ validateAndSanitizeRecipeData: Validates full structured recipe output and sanitizes missing fields
-✔ Serving Scaler Utility: Correctly formats quantities and handles fractional values
-✔ Serving Scaler Utility: Dampens salt and spice scaling when scaling up to protect dishes
-✔ Recipes API: Generates recipe in Hindi and passes language to Gemini prompt and database
-✔ Ingredients Image API: Rejects individual file exceeding 5MB limit with 400 Bad Request
-✔ Error Sanitization Security: Sensitive API keys and internal file paths are redacted in error responses
-...
-ℹ tests 69
-ℹ pass 69
-ℹ fail 0
-```
-
-Every commit and pull request to `main` triggers our automated [GitHub Actions CI Workflow](.github/workflows/ci.yml) which validates the backend tests, frontend ESLint quality, and client production build across **Node.js 20 and Node.js 22**.
+> 📋 **Detailed Test Coverage Breakdown:**
+> See [**`docs/README.md#testing--continuous-integration`**](docs/README.md#-testing--continuous-integration) for test scenarios and suite details.
 
 ---
 
 ## ☁️ Deployment Guide
 
-ChefMind AI is engineered to deploy cleanly as a modern decoupled full-stack application:
+ChefMind AI is engineered to deploy cleanly as a modern decoupled full-stack application (e.g. Express API on **Render / Railway** and React SPA on **Vercel / Netlify / Cloudflare Pages**).
 
-| Component | Recommended Hosts | Build & Runtime Configuration |
-|---|---|---|
-| **Backend API** | [Render](https://render.com) · [Railway](https://railway.app) · [Fly.io](https://fly.io) | Start Command: `npm start`<br/>Environment: `NODE_ENV=production`, `PORT`, `MONGODB_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `CLIENT_URL` |
-| **Frontend SPA** | [Vercel](https://vercel.com) · [Netlify](https://netlify.com) · [Cloudflare Pages](https://pages.cloudflare.com) | Root Directory: `frontend`<br/>Build Command: `npm run build`<br/>Output Directory: `dist`<br/>Environment: `VITE_API_BASE_URL=https://your-backend.onrender.com` |
+> 🚀 **Production Setup & Hosting Guide:**
+> Full step-by-step instructions, environment variable configurations, CORS setup, and proxy rules are detailed in [**`docs/README.md#deployment-guide`**](docs/README.md#-deployment-guide).
 
-*In production, configure your backend environment variables on your hosting provider dashboard and configure CLIENT_URL and VITE_API_BASE_URL to securely link both services.*
 
 ---
 
@@ -359,8 +320,6 @@ ChefMind-AI/
 
 **Harsh Raj**
 
-[![GitHub](https://img.shields.io/badge/GitHub-harsh--raj00-181717?style=flat-square&logo=github)](https://github.com/harsh-raj00)
-[![Portfolio](https://img.shields.io/badge/Portfolio-Visit%20Site-2ea44f?style=flat-square&logo=safari)](https://github.com/harsh-raj00)
 
 *Crafted with passion, modern engineering standards, and culinary curiosity.*
 
