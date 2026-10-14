@@ -17,6 +17,7 @@
 </p>
 
 <p align="center">
+  <a href="#-application-showcase"><b>Showcase</b></a> •
   <a href="#-key-features"><b>Key Features</b></a> •
   <a href="#-system-architecture"><b>Architecture</b></a> •
   <a href="#-tech-stack"><b>Tech Stack</b></a> •
@@ -34,6 +35,41 @@
 **ChefMind AI** is an intelligent, full-stack culinary assistant designed to solve daily mealtime decision paralysis and eliminate domestic food waste. By bridging multimodal computer vision, speech recognition, and generative AI with resilient culinary math, ChefMind turns raw pantry odds and ends into chef-grade, precisely measured recipes.
 
 Whether you **type** your ingredients, **speak** them aloud, or **snap a picture of your refrigerator shelf**, ChefMind inspects your pantry, accommodates dietary restrictions, respects custom cooking styles, and writes fully customized recipes in **English or Hindi (हिन्दी)**.
+
+---
+
+## 📸 Application Showcase
+
+### 1. Multimodal Pantry Vision & Smart Ingredient Review
+<div align="center">
+  <img src="frontend/public/screenshots/01-upload-ingredients.png" alt="Upload Pantry Photos" width="49%" style="border-radius: 8px; margin-right: 1%;" />
+  <img src="frontend/public/screenshots/02-ingredient-review.png" alt="AI Ingredient Review and Disambiguation" width="49%" style="border-radius: 8px;" />
+</div>
+<p align="center"><i>Left: Upload photos or take live camera snaps · Right: AI visual pantry summary with confidence separation and uncertain item disambiguation</i></p>
+
+### 2. Culinary Personalization & Custom Directives
+<div align="center">
+  <img src="frontend/public/screenshots/03-meal-preferences.png" alt="Culinary Preferences and Directives" width="92%" style="border-radius: 8px;" />
+</div>
+<p align="center"><i>Customize meal type, cuisine style, cooking time, servings, language (English / हिन्दी), spice level, and custom cooking instructions</i></p>
+
+### 3. Generated Recipe with Dynamic Serving Scaler
+<div align="center">
+  <img src="frontend/public/screenshots/04-recipe-instructions.png" alt="Generated Recipe with Step Checklist" width="92%" style="border-radius: 8px;" />
+</div>
+<p align="center"><i>Zero-latency serving scaler with salt/spice dampening, exact ingredient weights & units checklist, and sequential cooking steps</i></p>
+
+### 4. Smart Substitutions, Macro Nutrition & AI Chef Chat
+<div align="center">
+  <img src="frontend/public/screenshots/05-substitutions-nutrition-chat.png" alt="Substitutions, Nutrition and Interactive Chef Chat" width="92%" style="border-radius: 8px;" />
+</div>
+<p align="center"><i>1:1 ingredient substitutions with ratios, macronutrient breakdown (calories, protein, carbs, fat, fiber), pro tips, and conversational AI chef chat</i></p>
+
+### 5. Personal Cookbook with Bilingual English & Hindi Support
+<div align="center">
+  <img src="frontend/public/screenshots/06-my-cookbook.png" alt="My Cookbook Bilingual Saved Recipes" width="92%" style="border-radius: 8px;" />
+</div>
+<p align="center"><i>Save customized creations, toggle favorites, and browse recipes rendered natively in English and authentic Hindi (हिन्दी)</i></p>
 
 ---
 
