@@ -30,7 +30,6 @@ Thumbs.db
 coverage/
 .nyc_output/
 
-# Internal documentation
-docs/api.md
-docs/deployment.md
+# Internal documentation & private notes
+docs/
 

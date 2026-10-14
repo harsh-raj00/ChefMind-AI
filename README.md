@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/banner.jpg" alt="ChefMind AI Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
+<img src="assets/banner.jpg" alt="ChefMind AI Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
 
 # 🍳 ChefMind AI
 ### The Art of Culinary Intelligence · Transform Kitchen Scraps into Gourmet Creations
@@ -19,8 +19,7 @@
   <a href="#-system-architecture"><b>Architecture</b></a> •
   <a href="#-tech-stack"><b>Tech Stack</b></a> •
   <a href="#-quick-start"><b>Quick Start</b></a> •
-  <a href="#-security--hardening"><b>Security</b></a> •
-  <a href="docs/README.md"><b>API & Docs ↗</b></a>
+  <a href="#-security--hardening"><b>Security</b></a>
 </p>
 
 </div>
@@ -231,43 +230,6 @@ Run all root project commands with ease:
 
 ---
 
-## 🔌 API Reference & Endpoints
-
-ChefMind AI exposes 12 production-hardened REST endpoints across authentication, multi-modal ingredient vision, structured recipe generation, and recipe chat.
-
-> 📖 **Full Endpoint Table & Schema Contracts:**
-> See [**`docs/README.md#api-reference`**](docs/README.md#-api-reference) for the complete list of routes, authentication requirements, JSON request/response formats, and HTTP status codes.
-
----
-
-## 🧪 Testing & Continuous Integration
-
-ChefMind AI maintains comprehensive test coverage across both frontend and backend using Node's zero-dependency `node:test` framework and GitHub Actions:
-
-- **Backend Suite**: **69 automated tests** covering authentication, Gemini vision ingestion, serving scaling calculations, recipe chat mutations, and error sanitization.
-- **Continuous Integration**: Automated GitHub Actions matrix testing against **Node.js 20 and Node.js 22** on every commit.
-
-```bash
-npm test                # Run 69 backend unit and integration tests
-npm run lint:frontend   # ESLint code style and quality check
-npm run build:frontend  # Validate client production bundle compilation
-```
-
-> 📋 **Detailed Test Coverage Breakdown:**
-> See [**`docs/README.md#testing--continuous-integration`**](docs/README.md#-testing--continuous-integration) for test scenarios and suite details.
-
----
-
-## ☁️ Deployment Guide
-
-ChefMind AI is engineered to deploy cleanly as a modern decoupled full-stack application (e.g. Express API on **Render / Railway** and React SPA on **Vercel / Netlify / Cloudflare Pages**).
-
-> 🚀 **Production Setup & Hosting Guide:**
-> Full step-by-step instructions, environment variable configurations, CORS setup, and proxy rules are detailed in [**`docs/README.md#deployment-guide`**](docs/README.md#-deployment-guide).
-
-
----
-
 ## 📁 Repository Structure
 
 ```
@@ -295,8 +257,7 @@ ChefMind-AI/
 │   │   └── App.css              # Custom responsive stylesheet & animations
 │   ├── index.html               # SPA HTML shell
 │   └── vite.config.js           # Vite development server & reverse proxy
-├── docs/                        # Architecture diagrams and graphic assets
-│   └── assets/                  # High-resolution banners and diagrams
+├── assets/                      # Application banners and visual media
 ├── .env.example                 # Sanitized environment template
 ├── LICENSE                      # MIT Open Source License
 └── package.json                 # Workspace scripts & dependencies
