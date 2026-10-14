@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.jpg" alt="ChefMind AI Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
+<img src="frontend/public/banner.jpg" alt="ChefMind AI Banner" width="100%" style="border-radius: 12px; margin-bottom: 20px;" />
 
 # 🍳 ChefMind AI
 ### The Art of Culinary Intelligence · Transform Kitchen Scraps into Gourmet Creations
@@ -247,7 +247,7 @@ ChefMind-AI/
 │   ├── app.js                   # Express application setup
 │   └── server.js                # Server bootstrap & database connection
 ├── frontend/
-│   ├── public/                  # Favicon & SPA _redirects rule
+│   ├── public/                  # Favicon, banner image & SPA _redirects rule
 │   ├── src/
 │   │   ├── components/          # React components (Cookbook, Hero, RecipeResult, etc.)
 │   │   ├── services/            # Client API abstraction layer (auth, recipes, ingredients)
@@ -257,7 +257,6 @@ ChefMind-AI/
 │   │   └── App.css              # Custom responsive stylesheet & animations
 │   ├── index.html               # SPA HTML shell
 │   └── vite.config.js           # Vite development server & reverse proxy
-├── assets/                      # Application banners and visual media
 ├── .env.example                 # Sanitized environment template
 ├── LICENSE                      # MIT Open Source License
 └── package.json                 # Workspace scripts & dependencies
