@@ -4,8 +4,6 @@
 
 # 🍳 ChefMind AI
 ### The Art of Culinary Intelligence · Transform Kitchen Scraps into Gourmet Creations
-
-[![CI Workflow](https://github.com/harsh-raj00/ChefMind-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/harsh-raj00/ChefMind-AI/actions/workflows/ci.yml)
 [![Node Version](https://img.shields.io/badge/Node.js-20%20%7C%2022-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
@@ -234,9 +232,6 @@ Run all root project commands with ease:
 
 ```
 ChefMind-AI/
-├── .github/
-│   └── workflows/
-│       └── ci.yml               # GitHub Actions CI matrix (Node 20 & 22)
 ├── backend/
 │   ├── controllers/             # auth · ingredient · recipe business logic
 │   ├── middleware/              # JWT auth · rate limiters · file upload validators

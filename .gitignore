@@ -32,4 +32,5 @@ coverage/
 
 # Internal documentation & private notes
 docs/
+.github/
 
