@@ -11,11 +11,9 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Google Gemini](https://img.shields.io/badge/Google-Gemini%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F5A623?style=for-the-badge)](LICENSE)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/8c73ddaf-1a2a-408c-8c77-0e6fa92e9a87/deploy-status)](https://app.netlify.com/projects/nimble-pasca-e2a32a/deploys)
 
 <p align="center">
-  🌐 <b>Live Web Application:</b> <a href="https://nimble-pasca-e2a32a.netlify.app" target="_blank"><b>nimble-pasca-e2a32a.netlify.app</b></a> •
-  ⚡ <b>API Gateway:</b> <a href="https://chefmind-ai-b9nw.onrender.com/health" target="_blank"><b>chefmind-ai-b9nw.onrender.com</b></a>
+  🌐 <b>Live Web App:</b> <a href="https://chef-mind-ai.vercel.app" target="_blank"><b>chef-mind-ai.vercel.app</b></a>
 </p>
 
 <p align="center">
