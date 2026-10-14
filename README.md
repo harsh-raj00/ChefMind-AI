@@ -104,15 +104,22 @@ flowchart TB
         RecCtrl["🍲 Recipe & Chat Controller"]
     end
 
-    subgraph AI_Engine ["🤖 Multimodal AI Engine"]
+    subgraph AI_Engine ["🤖 Dual-Engine Resilient AI Pipeline"]
         direction TB
-        Chain["🔄 Fallback Chain Execution"]
-        M1["✨ Gemini 3.8 Flash"]
-        M2["⚡ Gemini 3.7 Flash"]
-        M3["🛡️ Gemini 3.5 Flash"]
+        Chain["🔄 Intelligent Provider Cascade"]
+        subgraph Groq_Tier ["⚡ Primary: Groq Cloud (Ultra-Fast)"]
+            G1["Llama 3.3 70B Versatile"]
+            G2["Llama 3.1 8B Instant"]
+            GV["Llama 3.2 11B Vision"]
+        end
+        subgraph Gemini_Tier ["🛡️ Fallback: Google Gemini API"]
+            M1["Gemini 3.8 Flash"]
+            M2["Gemini 3.7 Flash"]
+            M3["Gemini 3.5 Flash"]
+        end
         Validator["📋 Structural Sanitizer & Redactor"]
-        Chain --> M1 -. fallback .-> M2 -. fallback .-> M3
-        M1 & M2 & M3 --> Validator
+        Chain --> Groq_Tier -. "fallback on 429/503/timeout" .-> Gemini_Tier
+        Groq_Tier & Gemini_Tier --> Validator
     end
 
     subgraph Database ["🍃 MongoDB Atlas"]
@@ -127,14 +134,18 @@ flowchart TB
     Controllers <== "Mongoose ODM" ==> Database
 ```
 
-### The 3-Tier Gemini Fallback Chain
-Every generative request executes through a resilient fallback circuit. If a tier encounters rate limits (`429`), upstream downtime (`503`), or exceeds a **30-second timeout**, execution immediately cascades to the next stable model:
+### ⚡ Dual-Engine AI Cascade: Groq (Primary) ➔ Google Gemini (Fallback)
+ChefMind AI uses an intelligent dual-engine architecture prioritizing blisteringly fast inference speeds and zero-downtime reliability:
+1. **Primary Provider (Groq Cloud):** Dispatches requests to Groq's low-latency inference engine (`llama-3.3-70b-versatile` / `llama-3.1-8b-instant` for structured recipe generation and chef chat, `llama-3.2-11b-vision-preview` for multi-modal pantry vision) with native JSON mode and 25-second timeouts.
+2. **Resilient Fallback (Google Gemini API):** If Groq encounters rate limits (`429`), upstream load (`503`), network timeouts, or unconfigured keys, ChefMind immediately and invisibly cascades to Google Gemini (`gemini-3.8-flash` ➔ `gemini-3.7-flash` ➔ `gemini-3.5-flash`), guaranteeing 100% operational availability.
 
 ```
-┌────────────────────────┐      fallback      ┌────────────────────────┐      fallback      ┌────────────────────────┐
-│  gemini-3.8-flash      │ ─────────────────► │  gemini-3.7-flash      │ ─────────────────► │  gemini-3.5-flash      │
-│  (Ultra-low latency)   │                    │  (High-reasoning)      │                    │  (Maximum resilience)  │
-└────────────────────────┘                    └────────────────────────┘                    └────────────────────────┘
+┌──────────────────────────────────────┐      fallback on 429/503/timeout      ┌──────────────────────────────────────┐
+│  ⚡ Groq Cloud (Primary Engine)      │ ────────────────────────────────────► │  🛡️ Google Gemini (Fallback Engine)  │
+│  • llama-3.3-70b-versatile (Text)    │                                       │  • gemini-3.8-flash (Ultra-low lat)  │
+│  • llama-3.1-8b-instant (Fast Fail)  │                                       │  • gemini-3.7-flash (Reasoning)      │
+│  • llama-3.2-11b-vision (Multi-Image)│                                       │  • gemini-3.5-flash (Resilience)     │
+└──────────────────────────────────────┘                                       └──────────────────────────────────────┘
 ```
 
 ---
@@ -146,9 +157,9 @@ Every generative request executes through a resilient fallback circuit. If a tie
 | **Frontend** | **React 19** · **Vite 8** | Modern Vanilla CSS, Web Speech API, MediaDevices Camera API, Lucide-style SVG icons |
 | **Backend** | **Node.js 20/22** · **Express 5** | Native ES Modules, Multer (multipart), Express Rate Limit, Native `fetch` |
 | **Database** | **MongoDB Atlas** | Mongoose 9 ODM with schema validation, indexes, and strict user-scoping |
-| **Artificial Intelligence** | **Google Gemini REST API** | Multimodal Vision & Text Models (`gemini-3.8-flash`, `gemini-3.7-flash`, `gemini-3.5-flash`) |
+| **Artificial Intelligence** | **Groq Cloud** & **Google Gemini** | Groq (`llama-3.3-70b-versatile`, `llama-3.1-8b-instant`, `llama-3.2-11b-vision-preview`) with automatic fallback to Gemini (`3.8/3.7/3.5 Flash`) |
 | **Security & Auth** | **JWT** · **bcryptjs** | Custom security headers, CORS protection, multi-tier rate limiters, magic byte inspection |
-| **Testing & CI/CD** | **node:test** · **GitHub Actions** | Automated CI pipeline on Node 20 & 22 (unit tests, ESLint, production build) |
+| **Testing & CI/CD** | **node:test** · **GitHub Actions** | Automated CI pipeline on Node 20 & 22 (70 unit & integration tests, ESLint, production build) |
 
 ---
 
@@ -158,7 +169,8 @@ Every generative request executes through a resilient fallback circuit. If a tie
 * **Node.js**: `v20.0.0` or higher (verified on Node 20 & 22)
 * **npm**: `v9.0.0` or higher
 * **MongoDB**: A free [MongoDB Atlas](https://www.mongodb.com/atlas) connection URI (or local `mongod`)
-* **Gemini API Key**: From [Google AI Studio](https://aistudio.google.com/app/apikey)
+* **Groq API Key (Recommended)**: Free from [Groq Console](https://console.groq.com)
+* **Gemini API Key (Required Fallback)**: From [Google AI Studio](https://aistudio.google.com/app/apikey)
 
 ### 1. Clone the Repository
 ```bash
@@ -192,7 +204,8 @@ CLIENT_URL=http://localhost:5173
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.example.mongodb.net/chefmind?retryWrites=true&w=majority
 JWT_SECRET=your_super_secret_at_least_32_characters_random_key
 
-# Google Gemini API
+# AI Providers (Dual-Engine Cascade: Groq primary, Gemini fallback)
+GROQ_API_KEY=gsk_your_groq_api_key_here
 GEMINI_API_KEY=AIzaSyYourActualGeminiApiKeyHere
 ```
 

@@ -341,4 +341,85 @@ test("CORS Deployment: Multi-origin and trailing slash normalization", async () 
   }
 });
 
+test("AI Provider Cascade: Groq failure seamlessly cascades to Gemini", async () => {
+  const { default: jwt } = await import("jsonwebtoken");
+  const { baseUrl, close } = await startTestServer();
+  process.env.JWT_SECRET = process.env.JWT_SECRET || "test-jwt-secret-key-12345";
+  process.env.GROQ_API_KEY = "gsk_testGroqKey1234567890abcdefghijklmnopqrstuvwxyz";
+  process.env.GEMINI_API_KEY = "test-gemini-key";
+
+  const validToken = jwt.sign(
+    { userId: "507f1f77bcf86cd799439011" },
+    process.env.JWT_SECRET
+  );
+
+  let groqCalled = false;
+  let geminiCalled = false;
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    if (typeof url === "string" && url.includes("api.groq.com")) {
+      groqCalled = true;
+      // Simulate Groq rate limit / overload
+      return {
+        ok: false,
+        status: 429,
+        json: async () => ({
+          error: { message: "Rate limit reached for model on Groq" },
+        }),
+      };
+    }
+    if (typeof url === "string" && url.includes("generativelanguage.googleapis.com")) {
+      geminiCalled = true;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: JSON.stringify({
+                      type: "answer",
+                      message: "Gemini successfully answered the fallback request.",
+                    }),
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+      };
+    }
+    return originalFetch(url, options);
+  };
+
+  try {
+    const res = await fetch(`${baseUrl}/api/recipes/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${validToken}`,
+      },
+      body: JSON.stringify({
+        recipe: { title: "Spaghetti Aglio e Olio" },
+        message: "Can I use olive oil?",
+      }),
+    });
+
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.success, true);
+    assert.strictEqual(groqCalled, true);
+    assert.strictEqual(geminiCalled, true);
+    assert.strictEqual(data.response.type, "answer");
+  } finally {
+    globalThis.fetch = originalFetch;
+    delete process.env.GROQ_API_KEY;
+    await close();
+  }
+});
+
+
 

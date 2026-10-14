@@ -100,10 +100,15 @@ function sanitizeErrorMessage(msg) {
   if (!msg || typeof msg !== "string") {
     return "Failed to analyze the uploaded images.";
   }
-  if (msg.includes("GEMINI_API_KEY") || msg.toLowerCase().includes("api key")) {
+  if (
+    msg.includes("GEMINI_API_KEY") ||
+    msg.includes("GROQ_API_KEY") ||
+    msg.toLowerCase().includes("api key")
+  ) {
     return "AI vision service is not properly configured. Please contact support.";
   }
   let clean = msg.replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED]");
+  clean = clean.replace(/gsk_[0-9A-Za-z_-]{40,60}/g, "[REDACTED]");
   clean = clean.replace(/\/[a-zA-Z0-9_\-./]+\.(js|json|env)/g, "[internal file]");
   return clean;
 }

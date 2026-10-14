@@ -1,12 +1,16 @@
-const PRIMARY_MODEL = "gemini-3.8-flash";
-const FALLBACK_MODELS = ["gemini-3.7-flash", "gemini-3.5-flash"];
+const GROQ_PRIMARY_MODEL = "llama-3.3-70b-versatile";
+const GROQ_FALLBACK_MODELS = ["llama-3.1-8b-instant"];
+const GROQ_VISION_MODELS = ["llama-3.2-11b-vision-preview", "llama-3.2-90b-vision-preview"];
+
+const GEMINI_PRIMARY_MODEL = "gemini-3.8-flash";
+const GEMINI_FALLBACK_MODELS = ["gemini-3.7-flash", "gemini-3.5-flash"];
 
 /**
  * Clean markdown code fences and parse JSON safely.
  */
 function parseCleanJson(text) {
   if (!text || typeof text !== "string") {
-    throw new Error("Gemini returned an empty response.");
+    throw new Error("AI provider returned an empty response.");
   }
 
   let cleaned = text.trim();
@@ -19,6 +23,84 @@ function parseCleanJson(text) {
 }
 
 /**
+ * Execute native fetch call to Groq Cloud API with model fallback.
+ */
+async function callGroqApi({
+  messages,
+  models = [GROQ_PRIMARY_MODEL, ...GROQ_FALLBACK_MODELS],
+  temperature = 0.6,
+  jsonMode = true,
+  returnRawText = false,
+}) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey || !apiKey.trim()) {
+    throw new Error("GROQ_API_KEY is not configured.");
+  }
+
+  let lastError = null;
+
+  for (const model of models) {
+    try {
+      const payload = {
+        model,
+        messages,
+        temperature,
+      };
+
+      if (jsonMode) {
+        payload.response_format = { type: "json_object" };
+      }
+
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey.trim()}`,
+        },
+        signal: AbortSignal.timeout(25000),
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const rawError = result.error?.message || `HTTP ${response.status}`;
+        const errorMsg = typeof rawError === "string"
+          ? rawError.replace(/gsk_[0-9A-Za-z_-]{40,60}/g, "[REDACTED]")
+          : "Groq API error";
+
+        // If rate limit, high load or server error, cascade to next Groq model
+        if (response.status === 429 || response.status === 503 || response.status >= 500) {
+          lastError = new Error(errorMsg);
+          console.warn(`[Groq] ${model} rate-limited or unavailable (${errorMsg}). Trying next Groq model...`);
+          continue;
+        }
+        throw new Error(errorMsg);
+      }
+
+      const content = result.choices?.[0]?.message?.content?.trim();
+      if (!content) {
+        throw new Error("Groq returned empty response content.");
+      }
+
+      if (returnRawText) {
+        return content;
+      }
+
+      return parseCleanJson(content);
+    } catch (err) {
+      lastError = err;
+      if (err.name === "TimeoutError") {
+        console.warn(`[Groq] ${model} timed out after 25s. Trying next Groq model...`);
+        continue;
+      }
+    }
+  }
+
+  throw lastError || new Error("Groq request failed across all candidate models.");
+}
+
+/**
  * Execute native fetch call to Google Gemini generateContent API with fallback resilience.
  */
 async function callGeminiApi({ contents, generationConfig, returnRawText = false }) {
@@ -27,7 +109,8 @@ async function callGeminiApi({ contents, generationConfig, returnRawText = false
     throw new Error("GEMINI_API_KEY is not configured.");
   }
 
-  const modelsToTry = [PRIMARY_MODEL, ...FALLBACK_MODELS];
+  const modelsToTry = [GEMINI_PRIMARY_MODEL, ...GEMINI_FALLBACK_MODELS];
+
   let lastError = null;
 
   for (const model of modelsToTry) {
@@ -138,7 +221,40 @@ export function validateVisionResponse(data) {
 }
 
 /**
- * Analyzes one or more ingredient images using Gemini vision via native fetch.
+ * Normalizes, cleans, and deduplicates vision ingredient observations.
+ */
+function normalizeVisionResult(data) {
+  const seenIngredients = new Set();
+  const cleanIngredients = [];
+  for (const item of data.ingredients) {
+    const trimmed = item.trim();
+    const lower = trimmed.toLowerCase();
+    if (trimmed && !seenIngredients.has(lower)) {
+      seenIngredients.add(lower);
+      cleanIngredients.push(trimmed);
+    }
+  }
+
+  const seenUncertain = new Set();
+  const cleanUncertain = [];
+  for (const item of data.uncertainItems) {
+    const trimmed = item.trim();
+    const lower = trimmed.toLowerCase();
+    if (trimmed && !seenUncertain.has(lower) && !seenIngredients.has(lower)) {
+      seenUncertain.add(lower);
+      cleanUncertain.push(trimmed);
+    }
+  }
+
+  return {
+    ingredients: cleanIngredients,
+    observations: data.observations.trim(),
+    uncertainItems: cleanUncertain,
+  };
+}
+
+/**
+ * Analyzes one or more ingredient images using Groq Vision (primary) with Gemini Vision fallback.
  * Accepts an array of { buffer, mimetype } objects (or single buffer, mimeType for backward compatibility).
  */
 export async function analyzeImageIngredients(imagesOrBuffer, maybeMimeType) {
@@ -180,6 +296,43 @@ Output MUST be a valid JSON object matching this schema:
   "uncertainItems": ["string"]
 }`;
 
+  // 1. Try Groq Vision first if GROQ_API_KEY is configured
+  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
+    try {
+      const userContent = [{ type: "text", text: prompt }];
+      for (const img of images) {
+        userContent.push({
+          type: "image_url",
+          image_url: {
+            url: `data:${img.mimetype};base64,${img.buffer.toString("base64")}`,
+          },
+        });
+      }
+
+      const groqResult = await callGroqApi({
+        messages: [
+          {
+            role: "system",
+            content: "You are ChefMind AI's culinary vision engine. Analyze the photos and return valid JSON matching the schema.",
+          },
+          {
+            role: "user",
+            content: userContent,
+          },
+        ],
+        models: GROQ_VISION_MODELS,
+        temperature: 0.2,
+        jsonMode: true,
+      });
+
+      validateVisionResponse(groqResult);
+      return normalizeVisionResult(groqResult);
+    } catch (groqErr) {
+      console.warn(`[AI Provider Fallback] Groq vision failed (${groqErr.message}). Cascading to Google Gemini Vision...`);
+    }
+  }
+
+  // 2. Primary fallback: Google Gemini Vision
   const parts = [{ text: prompt }];
 
   for (const img of images) {
@@ -221,36 +374,7 @@ Output MUST be a valid JSON object matching this schema:
 
   // Authoritative backend validation - never trust model output without verification
   validateVisionResponse(result);
-
-  // Clean, normalize, and deduplicate outputs case-insensitively
-  const seenIngredients = new Set();
-  const cleanIngredients = [];
-  for (const item of result.ingredients) {
-    const trimmed = item.trim();
-    const lower = trimmed.toLowerCase();
-    if (trimmed && !seenIngredients.has(lower)) {
-      seenIngredients.add(lower);
-      cleanIngredients.push(trimmed);
-    }
-  }
-
-  const seenUncertain = new Set();
-  const cleanUncertain = [];
-  for (const item of result.uncertainItems) {
-    const trimmed = item.trim();
-    const lower = trimmed.toLowerCase();
-    // Do not duplicate within uncertainItems, and do not repeat an item already confirmed in ingredients
-    if (trimmed && !seenUncertain.has(lower) && !seenIngredients.has(lower)) {
-      seenUncertain.add(lower);
-      cleanUncertain.push(trimmed);
-    }
-  }
-
-  return {
-    ingredients: cleanIngredients,
-    observations: result.observations.trim(),
-    uncertainItems: cleanUncertain,
-  };
+  return normalizeVisionResult(result);
 }
 
 /**
@@ -410,6 +534,35 @@ Return valid JSON only without Markdown code blocks, using exactly this structur
 }
 `;
 
+  // 1. Try Groq as primary LLM provider if GROQ_API_KEY is configured
+  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
+    try {
+      const groqResult = await callGroqApi({
+        messages: [
+          {
+            role: "system",
+            content: "You are ChefMind AI, a master chef and culinary instructor. Generate realistic, detailed, delicious recipes in valid JSON according to the requested schema.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        models: [GROQ_PRIMARY_MODEL, ...GROQ_FALLBACK_MODELS],
+        temperature: 0.6,
+        jsonMode: true,
+      });
+
+      if (groqResult && typeof groqResult === "object" && groqResult.title) {
+        return groqResult;
+      }
+      console.warn("[AI Provider Fallback] Groq returned malformed recipe structure. Cascading to Google Gemini...");
+    } catch (groqErr) {
+      console.warn(`[AI Provider Fallback] Groq recipe generation failed (${groqErr.message}). Cascading to Google Gemini...`);
+    }
+  }
+
+  // 2. Primary fallback: Google Gemini API
   return callGeminiApi({
     contents: [
       {
@@ -546,18 +699,47 @@ If recipe_update:
 }
 `;
 
-  const rawResponse = await callGeminiApi({
-    contents: [
-      {
-        parts: [{ text: prompt }],
+  let rawResponse = null;
+
+  // 1. Try Groq as primary LLM provider if GROQ_API_KEY is configured
+  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
+    try {
+      rawResponse = await callGroqApi({
+        messages: [
+          {
+            role: "system",
+            content: "You are ChefMind AI, the executive chef who crafted this recipe. Chat with the home cook and return JSON matching the instructions.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        models: [GROQ_PRIMARY_MODEL, ...GROQ_FALLBACK_MODELS],
+        temperature: 0.5,
+        jsonMode: true,
+        returnRawText: true,
+      });
+    } catch (groqErr) {
+      console.warn(`[AI Provider Fallback] Groq recipe chat failed (${groqErr.message}). Cascading to Google Gemini...`);
+    }
+  }
+
+  // 2. Primary fallback: Google Gemini API
+  if (!rawResponse) {
+    rawResponse = await callGeminiApi({
+      contents: [
+        {
+          parts: [{ text: prompt }],
+        },
+      ],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.5,
       },
-    ],
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.5,
-    },
-    returnRawText: true,
-  });
+      returnRawText: true,
+    });
+  }
 
   try {
     return parseCleanJson(rawResponse);
