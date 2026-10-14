@@ -1,7 +1,7 @@
 # 🏗 ChefMind AI — Architecture & System Design
 
 > How ChefMind AI is built: its layers, data flows, data model, security design and the reasons behind key decisions.
-> 📚 Related docs: [API Reference](api.md) · [Deployment](deployment.md) · [Back to README](../README.md)
+> 📚 Related docs: [Back to README](../README.md)
 
 ---
 

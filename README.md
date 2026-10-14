@@ -252,8 +252,7 @@ All responses conform to the consistent format `{ success: true, ...data }` or `
 | `DELETE` | `/api/recipes/:id` | 🔒 Bearer | Permanently delete a recipe from the user's cookbook |
 | `GET` | `/health` | Public | Liveness probe returning process uptime and timestamp |
 | `GET` | `/health/ready` | Public | Readiness probe checking active MongoDB database connectivity |
-
-*Complete request/response JSON payloads and error code specifications are documented in [`docs/api.md`](docs/api.md).*
+*All endpoints require standard application/json payloads (except multipart image upload) and return standardized JSON envelopes as described above.*
 
 ---
 
@@ -304,7 +303,7 @@ ChefMind AI is engineered to deploy cleanly as a modern decoupled full-stack app
 | **Backend API** | [Render](https://render.com) · [Railway](https://railway.app) · [Fly.io](https://fly.io) | Start Command: `npm start`<br/>Environment: `NODE_ENV=production`, `PORT`, `MONGODB_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `CLIENT_URL` |
 | **Frontend SPA** | [Vercel](https://vercel.com) · [Netlify](https://netlify.com) · [Cloudflare Pages](https://pages.cloudflare.com) | Root Directory: `frontend`<br/>Build Command: `npm run build`<br/>Output Directory: `dist`<br/>Environment: `VITE_API_BASE_URL=https://your-backend.onrender.com` |
 
-*Step-by-step production setup, custom domain routing, and MongoDB Atlas IP whitelisting are detailed in [`docs/deployment.md`](docs/deployment.md).*
+*In production, configure your backend environment variables on your hosting provider dashboard and configure CLIENT_URL and VITE_API_BASE_URL to securely link both services.*
 
 ---
 
@@ -335,7 +334,7 @@ ChefMind-AI/
 │   │   └── App.css              # Custom responsive stylesheet & animations
 │   ├── index.html               # SPA HTML shell
 │   └── vite.config.js           # Vite development server & reverse proxy
-├── docs/                        # Architecture, API, and Deployment documentation
+├── docs/                        # Architecture diagrams and graphic assets
 │   └── assets/                  # High-resolution banners and diagrams
 ├── .env.example                 # Sanitized environment template
 ├── LICENSE                      # MIT Open Source License
