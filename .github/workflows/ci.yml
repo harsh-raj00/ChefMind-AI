@@ -1,0 +1,46 @@
+name: ChefMind AI — CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Test, Lint & Build Verification
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend ci
+
+      - name: Run backend automated tests
+        run: npm test
+        env:
+          JWT_SECRET: test_jwt_secret_must_be_at_least_32_characters_long_for_security
+          MONGODB_URI: mongodb://localhost:27017/chefmind_test
+          GEMINI_API_KEY: test_dummy_key_not_invoked_in_unit_tests
+          NODE_ENV: test
+
+      - name: Lint frontend codebase
+        run: npm run lint:frontend
+
+      - name: Verify production build
+        run: npm run build:frontend
