@@ -283,7 +283,7 @@ npm run dev:frontend
 Open your browser at **`http://localhost:5173`** to begin cooking!
 
 ---
-
+<!-- 
 ## ⚙️ Configuration
 
 Only `MONGODB_URI`, `JWT_SECRET` and one AI key are required. Everything else has a sensible default. See [`.env.example`](.env.example) for the full annotated template.
@@ -303,7 +303,7 @@ Only `MONGODB_URI`, `JWT_SECRET` and one AI key are required. Everything else ha
 | `LLM_STATS_TOKEN` | Optional | — | Enables the token-protected `GET /api/health/ai` metrics endpoint |
 | `LLM_LOG` | Optional | `on` | Set to `off` to silence structured per-attempt LLM logs |
 
----
+--- -->
 <!-- 
 ## 🔌 REST API Reference
 
