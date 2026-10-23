@@ -11,7 +11,6 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![Groq](https://img.shields.io/badge/Groq-LPU%20Inference-F55036?style=for-the-badge)](https://groq.com)
 [![Google Gemini](https://img.shields.io/badge/Google-Gemini%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
-[![CI](https://img.shields.io/github/actions/workflow/status/harsh-raj00/ChefMind-AI/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/harsh-raj00/ChefMind-AI/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F5A623?style=for-the-badge)](LICENSE)
 
 <p align="center">
@@ -305,7 +304,7 @@ Only `MONGODB_URI`, `JWT_SECRET` and one AI key are required. Everything else ha
 | `LLM_LOG` | Optional | `on` | Set to `off` to silence structured per-attempt LLM logs |
 
 ---
-
+<!-- 
 ## 🔌 REST API Reference
 
 All routes are prefixed with `/api`. 🔑 = requires `Authorization: Bearer <JWT>`.
@@ -325,7 +324,7 @@ All routes are prefixed with `/api`. 🔑 = requires `Authorization: Bearer <JWT
 | `GET` | `/health` · `/health/ready` | — | Liveness and database-readiness probes |
 | `GET` | `/health/ai` | `LLM_STATS_TOKEN` | Per-model latency, token usage, failures and circuit state |
 
----
+--- -->
 
 ## 🛡️ Security & Hardening
 
