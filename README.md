@@ -9,7 +9,9 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Express](https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
+[![Groq](https://img.shields.io/badge/Groq-LPU%20Inference-F55036?style=for-the-badge)](https://groq.com)
 [![Google Gemini](https://img.shields.io/badge/Google-Gemini%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![CI](https://img.shields.io/github/actions/workflow/status/harsh-raj00/ChefMind-AI/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/harsh-raj00/ChefMind-AI/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F5A623?style=for-the-badge)](LICENSE)
 
 <p align="center">
@@ -22,6 +24,8 @@
   <a href="#-system-architecture"><b>Architecture</b></a> •
   <a href="#-tech-stack"><b>Tech Stack</b></a> •
   <a href="#-quick-start"><b>Quick Start</b></a> •
+  <a href="#-configuration"><b>Configuration</b></a> •
+  <a href="#-rest-api-reference"><b>API</b></a> •
   <a href="#-security--hardening"><b>Security</b></a> •
   <a href="#-future-improvements"><b>Roadmap</b></a>
 </p>
@@ -130,7 +134,7 @@ flowchart TB
 
     subgraph Gateway ["🛡️ Express API Gateway"]
         direction TB
-        SecHeaders["🔒 Helmet Security Headers"]
+        SecHeaders["🔒 Custom Security Headers"]
         Cors["🌐 Strict CORS Whitelist"]
         Limiter["🚦 3-Tier IP Rate Limiters"]
         AuthMiddleware["🔑 JWT Authentication & Isolation"]
@@ -146,7 +150,7 @@ flowchart TB
 
     subgraph AI_Engine ["🤖 Dual-Engine Resilient AI Pipeline"]
         direction TB
-        Chain["🔄 Intelligent Provider Cascade"]
+        Chain["🧭 LLM Gateway (deadline · circuit breaker · metrics)"]
         subgraph Groq_Tier ["⚡ Primary: Groq Cloud (Ultra-Fast)"]
             G1["openai/gpt-oss-120b "]
             G2["llama-3.3-70b-versatile"]
@@ -281,6 +285,60 @@ Open your browser at **`http://localhost:5173`** to begin cooking!
 
 ---
 
+## ⚙️ Configuration
+
+Only `MONGODB_URI`, `JWT_SECRET` and one AI key are required. Everything else has a sensible default. See [`.env.example`](.env.example) for the full annotated template.
+
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `MONGODB_URI` | ✅ | — | MongoDB Atlas connection string |
+| `JWT_SECRET` | ✅ | — | Token signing secret (32+ random characters in production) |
+| `GROQ_API_KEY` | ⭐ Recommended | — | Primary, ultra-fast LLM provider |
+| `GEMINI_API_KEY` | ✅ Fallback | — | Fallback provider (or sole provider if Groq is omitted) |
+| `CLIENT_URL` | Production | `http://localhost:5173` | Comma-separated CORS allow-list |
+| `LLM_GATEWAY_URL` | Optional | — | Route through an OpenAI-compatible gateway (Cloudflare AI Gateway, Portkey, OpenRouter) |
+| `LLM_DEADLINE_MS` | Optional | `55000` | Total time budget for one AI request across all fallbacks |
+| `LLM_ATTEMPT_TIMEOUT_MS` | Optional | `25000` | Timeout for a single model attempt |
+| `GROQ_TEXT_MODELS` / `GROQ_VISION_MODELS` | Optional | built-in | Comma-separated model overrides, e.g. when a provider retires a model |
+| `GEMINI_TEXT_MODELS` / `GEMINI_VISION_MODELS` | Optional | built-in | Same, for Gemini |
+| `LLM_STATS_TOKEN` | Optional | — | Enables the token-protected `GET /api/health/ai` metrics endpoint |
+| `LLM_LOG` | Optional | `on` | Set to `off` to silence structured per-attempt LLM logs |
+
+---
+
+## 🔌 REST API Reference
+
+All routes are prefixed with `/api`. 🔑 = requires `Authorization: Bearer <JWT>`.
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/auth/register` | — | Create an account (bcrypt-hashed password) |
+| `POST` | `/auth/login` | — | Exchange credentials for a JWT |
+| `GET` | `/auth/me` | 🔑 | Current user profile |
+| `POST` | `/ingredients/image-analyze` | 🔑 | Analyze up to 5 pantry photos (JPEG/PNG/WebP, 5 MB each) |
+| `POST` | `/recipes/generate` | 🔑 | Generate and save a recipe from ingredients and preferences |
+| `POST` | `/recipes/chat` · `/recipes/:id/chat` | 🔑 | Ask the AI sous-chef about, or modify, a recipe |
+| `POST` | `/recipes/save` | 🔑 | Save a custom or modified recipe |
+| `GET` | `/recipes` | 🔑 | List your saved recipes |
+| `PATCH` | `/recipes/:id/favorite` | 🔑 | Toggle favorite |
+| `DELETE` | `/recipes/:id` | 🔑 | Delete a recipe |
+| `GET` | `/health` · `/health/ready` | — | Liveness and database-readiness probes |
+| `GET` | `/health/ai` | `LLM_STATS_TOKEN` | Per-model latency, token usage, failures and circuit state |
+
+---
+
+## 🛡️ Security & Hardening
+
+* **Authentication:** bcrypt password hashing, JWT sessions, and strict per-user data scoping on every recipe query.
+* **Three-tier rate limiting:** Separate 15-minute windows for auth, general API, and expensive AI endpoints.
+* **Strict CORS allow-list** with trailing-slash normalization and custom security headers (no external dependency).
+* **Upload validation:** MIME allow-list, 5 MB per-file cap, magic-byte inspection, and in-memory buffers cleared after analysis.
+* **Prompt-injection guardrails:** User directives are framed as untrusted culinary preferences, and every model response is schema-validated and sanitized server-side.
+* **Secret hygiene:** Groq, Gemini and gateway keys are redacted from all error messages and logs; the frontend never sees a provider key.
+* **Hermetic tests:** The test suite blanks real API keys before loading, so CI and local runs never make live AI calls.
+
+---
+
 ## 📜 Available NPM Scripts
 
 Run all root project commands with ease:
@@ -329,14 +387,14 @@ ChefMind-AI/
 
 ## 🚀 Future Improvements
 
-1. **Nutrition Estimation:** Display estimated calories, protein, carbohydrates, fats, and fiber per serving using a reliable nutrition database or API. Recalculate nutrition when ingredients or serving sizes change.
-2. **Smart Ingredient Substitution:** Suggest alternatives for unavailable ingredients while preserving dietary preferences. Automatically update quantities, cooking instructions, and nutrition estimates.
+1. **Verified Nutrition Data:** Replace LLM-estimated macros with a trusted nutrition database or API, recalculated live as ingredients and servings change.
+2. **Substitution-Aware Recalculation:** When a substitution is applied, automatically update quantities, cooking steps, and nutrition.
 3. **AI Dietitian & Personalized Recommendations:** Recommend recipes based on dietary preferences, nutrition goals, allergies, and fitness objectives. Provide daily nutrition summaries without presenting AI suggestions as medical advice.
 4. **Weekly Meal Planner:** Generate personalized seven-day meal plans based on cuisine, budget, servings, available ingredients, and dietary requirements. Generate a combined shopping list with consolidated quantities.
 5. **Google Health Integration:** Explore Google Health Connect on Android to use authorized activity and health data for personalized meal recommendations, subject to supported APIs and user permissions.
 6. **Agentic AI with LangGraph:** Implement specialized agents for ingredient analysis, recipe planning, nutrition analysis, ingredient substitution, and dietary validation. Orchestrate them using shared state, conditional workflows, validation, and bounded retries.
 7. **Nutrition Knowledge Base (RAG):** Retrieve nutrition facts from trusted sources and use them to provide evidence-based explanations.
-8. **AI Observability:** Monitor LLM latency, token usage, API costs, failures, agent execution traces, and recipe quality.
+8. **AI Observability Dashboard:** Build on the gateway's existing latency, token and failure metrics with cost tracking, traces, and recipe-quality evaluation.
 9. **Smart Shopping:** Optimize shopping lists based on existing ingredients, grocery budgets, ingredient reuse, and estimated prices.
 
 > [!TIP]
