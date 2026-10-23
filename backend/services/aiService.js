@@ -1,195 +1,12 @@
-const GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b";
-const GROQ_FALLBACK_MODELS = [
-  "llama-3.3-70b-versatile",
-  "openai/gpt-oss-20b",
-  "llama-3.1-8b-instant",
-];
-const GROQ_VISION_MODELS = ["llama-3.2-11b-vision-preview", "llama-3.2-90b-vision-preview"];
-
-const GEMINI_PRIMARY_MODEL = "gemini-3.8-flash";
-const GEMINI_FALLBACK_MODELS = ["gemini-3.7-flash", "gemini-3.5-flash"];
+import { callLLM, parseCleanJson } from "./llmGateway.js";
 
 /**
- * Clean markdown code fences and parse JSON safely.
- */
-function parseCleanJson(text) {
-  if (!text || typeof text !== "string") {
-    throw new Error("AI provider returned an empty response.");
-  }
-
-  let cleaned = text.trim();
-  // Strip markdown code block wrappers if model outputs them
-  if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  }
-
-  return JSON.parse(cleaned);
-}
-
-/**
- * Execute native fetch call to Groq Cloud API with model fallback.
- */
-async function callGroqApi({
-  messages,
-  models = [GROQ_PRIMARY_MODEL, ...GROQ_FALLBACK_MODELS],
-  temperature = 0.6,
-  jsonMode = true,
-  returnRawText = false,
-}) {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey || !apiKey.trim()) {
-    throw new Error("GROQ_API_KEY is not configured.");
-  }
-
-  let lastError = null;
-
-  for (const model of models) {
-    try {
-      const payload = {
-        model,
-        messages,
-        temperature,
-      };
-
-      if (jsonMode) {
-        payload.response_format = { type: "json_object" };
-      }
-
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey.trim()}`,
-        },
-        signal: AbortSignal.timeout(25000),
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        const rawError = result.error?.message || `HTTP ${response.status}`;
-        const errorMsg = typeof rawError === "string"
-          ? rawError.replace(/gsk_[0-9A-Za-z_-]{40,60}/g, "[REDACTED]")
-          : "Groq API error";
-
-        // If rate limit, high load or server error, cascade to next Groq model
-        if (response.status === 429 || response.status === 503 || response.status >= 500) {
-          lastError = new Error(errorMsg);
-          console.warn(`[Groq] ${model} rate-limited or unavailable (${errorMsg}). Trying next Groq model...`);
-          continue;
-        }
-        throw new Error(errorMsg);
-      }
-
-      const content = result.choices?.[0]?.message?.content?.trim();
-      if (!content) {
-        throw new Error("Groq returned empty response content.");
-      }
-
-      if (returnRawText) {
-        return content;
-      }
-
-      return parseCleanJson(content);
-    } catch (err) {
-      lastError = err;
-      if (err.name === "TimeoutError") {
-        console.warn(`[Groq] ${model} timed out after 25s. Trying next Groq model...`);
-        continue;
-      }
-    }
-  }
-
-  throw lastError || new Error("Groq request failed across all candidate models.");
-}
-
-/**
- * Execute native fetch call to Google Gemini generateContent API with fallback resilience.
- */
-async function callGeminiApi({ contents, generationConfig, returnRawText = false }) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured.");
-  }
-
-  const modelsToTry = [GEMINI_PRIMARY_MODEL, ...GEMINI_FALLBACK_MODELS];
-
-  let lastError = null;
-
-  for (const model of modelsToTry) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        signal: AbortSignal.timeout(30000),
-        body: JSON.stringify({
-          contents,
-          generationConfig,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        const rawError = result.error?.message || `HTTP ${response.status}`;
-        const errorMsg = typeof rawError === "string"
-          ? rawError.replace(/AIza[0-9A-Za-z-_]{35}/g, "[REDACTED]")
-          : "Gemini API error";
-        // If demand spike or temporary rate limit, try next model in fallback cascade
-        if (
-          response.status === 429 ||
-          response.status === 503 ||
-          errorMsg.toLowerCase().includes("high demand")
-        ) {
-          lastError = new Error(errorMsg);
-          console.warn(`[Gemini] ${model} high demand/overload (${errorMsg}). Trying fallback...`);
-          continue;
-        }
-        throw new Error(errorMsg);
-      }
-
-      const generatedText = result.candidates?.[0]?.content?.parts
-        ?.map((part) => part.text || "")
-        .join("")
-        .trim();
-
-      if (!generatedText) {
-        throw new Error("Gemini returned an empty candidate part.");
-      }
-
-      if (returnRawText) {
-        return generatedText;
-      }
-
-      return parseCleanJson(generatedText);
-    } catch (err) {
-      lastError = err;
-      if (err.name === "TimeoutError") {
-        console.warn(`[Gemini] ${model} request timed out after 30s. Trying fallback...`);
-        continue;
-      }
-      if (err.message && err.message.toLowerCase().includes("high demand")) {
-        continue;
-      }
-    }
-  }
-
-  throw lastError || new Error("Gemini request failed across all candidate models.");
-}
-
-/**
- * Validates the parsed Gemini vision output structure and field types.
+ * Validates the parsed vision model output structure and field types.
  * Enforces: ingredients (array of strings), observations (string), uncertainItems (array of strings).
  */
 export function validateVisionResponse(data) {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
-    throw new Error("Invalid response format: expected a JSON object from Gemini.");
+    throw new Error("Invalid response format: expected a JSON object from the AI provider.");
   }
 
   if (!("ingredients" in data)) {
@@ -258,7 +75,7 @@ function normalizeVisionResult(data) {
 }
 
 /**
- * Analyzes one or more ingredient images using Groq Vision (primary) with Gemini Vision fallback.
+ * Analyzes one or more ingredient images through the LLM gateway's vision model cascade.
  * Accepts an array of { buffer, mimetype } objects (or single buffer, mimeType for backward compatibility).
  */
 export async function analyzeImageIngredients(imagesOrBuffer, maybeMimeType) {
@@ -300,89 +117,57 @@ Output MUST be a valid JSON object matching this schema:
   "uncertainItems": ["string"]
 }`;
 
-  // 1. Try Groq Vision first if GROQ_API_KEY is configured
-  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
-    try {
-      const userContent = [{ type: "text", text: prompt }];
-      for (const img of images) {
-        userContent.push({
-          type: "image_url",
-          image_url: {
-            url: `data:${img.mimetype};base64,${img.buffer.toString("base64")}`,
-          },
-        });
-      }
-
-      const groqResult = await callGroqApi({
-        messages: [
-          {
-            role: "system",
-            content: "You are ChefMind AI's culinary vision engine. Analyze the photos and return valid JSON matching the schema.",
-          },
-          {
-            role: "user",
-            content: userContent,
-          },
-        ],
-        models: GROQ_VISION_MODELS,
-        temperature: 0.2,
-        jsonMode: true,
-      });
-
-      validateVisionResponse(groqResult);
-      return normalizeVisionResult(groqResult);
-    } catch (groqErr) {
-      console.warn(`[AI Provider Fallback] Groq vision failed (${groqErr.message}). Cascading to Google Gemini Vision...`);
-    }
-  }
-
-  // 2. Primary fallback: Google Gemini Vision
-  const parts = [{ text: prompt }];
-
+  const userContent = [{ type: "text", text: prompt }];
   for (const img of images) {
-    parts.push({
-      inline_data: {
-        mime_type: img.mimetype,
-        data: img.buffer.toString("base64"),
+    userContent.push({
+      type: "image_url",
+      image_url: {
+        url: `data:${img.mimetype};base64,${img.buffer.toString("base64")}`,
       },
     });
   }
 
-  const result = await callGeminiApi({
-    contents: [{ parts }],
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: "OBJECT",
-        properties: {
-          ingredients: {
-            type: "ARRAY",
-            items: { type: "STRING" },
-            description: "Distinct food ingredients identified with high confidence across all images.",
-          },
-          observations: {
-            type: "STRING",
-            description: "Concise summary of the visual evidence and visible items observed across all images.",
-          },
-          uncertainItems: {
-            type: "ARRAY",
-            items: { type: "STRING" },
-            description: "Ambiguous or difficult-to-distinguish items, with a brief explanation of uncertainty and alternatives.",
-          },
-        },
-        required: ["ingredients", "observations", "uncertainItems"],
+  // Authoritative backend validation runs inside the gateway, so a malformed answer
+  // from one model fails over to the next instead of surfacing to the user.
+  const { data } = await callLLM({
+    task: "vision",
+    messages: [
+      {
+        role: "system",
+        content: "You are ChefMind AI's culinary vision engine. Analyze the photos and return valid JSON matching the schema.",
       },
-      temperature: 0.2,
+      { role: "user", content: userContent },
+    ],
+    temperature: 0.2,
+    json: true,
+    geminiSchema: {
+      type: "OBJECT",
+      properties: {
+        ingredients: {
+          type: "ARRAY",
+          items: { type: "STRING" },
+          description: "Distinct food ingredients identified with high confidence across all images.",
+        },
+        observations: {
+          type: "STRING",
+          description: "Concise summary of the visual evidence and visible items observed across all images.",
+        },
+        uncertainItems: {
+          type: "ARRAY",
+          items: { type: "STRING" },
+          description: "Ambiguous or difficult-to-distinguish items, with a brief explanation of uncertainty and alternatives.",
+        },
+      },
+      required: ["ingredients", "observations", "uncertainItems"],
     },
+    validate: validateVisionResponse,
   });
 
-  // Authoritative backend validation - never trust model output without verification
-  validateVisionResponse(result);
-  return normalizeVisionResult(result);
+  return normalizeVisionResult(data);
 }
 
 /**
- * Generates a structured recipe from ingredients and preferences using Gemini via native fetch.
+ * Generates a structured recipe from ingredients and preferences through the LLM gateway.
  */
 export async function generateRecipeWithAI({
   ingredients,
@@ -538,50 +323,29 @@ Return valid JSON only without Markdown code blocks, using exactly this structur
 }
 `;
 
-  // 1. Try Groq as primary LLM provider if GROQ_API_KEY is configured
-  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
-    try {
-      const groqResult = await callGroqApi({
-        messages: [
-          {
-            role: "system",
-            content: "You are ChefMind AI, a master chef and culinary instructor. Generate realistic, detailed, delicious recipes in valid JSON according to the requested schema.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        models: [GROQ_PRIMARY_MODEL, ...GROQ_FALLBACK_MODELS],
-        temperature: 0.6,
-        jsonMode: true,
-      });
-
-      if (groqResult && typeof groqResult === "object" && groqResult.title) {
-        return groqResult;
-      }
-      console.warn("[AI Provider Fallback] Groq returned malformed recipe structure. Cascading to Google Gemini...");
-    } catch (groqErr) {
-      console.warn(`[AI Provider Fallback] Groq recipe generation failed (${groqErr.message}). Cascading to Google Gemini...`);
-    }
-  }
-
-  // 2. Primary fallback: Google Gemini API
-  return callGeminiApi({
-    contents: [
+  const { data } = await callLLM({
+    task: "text",
+    messages: [
       {
-        parts: [{ text: prompt }],
+        role: "system",
+        content: "You are ChefMind AI, a master chef and culinary instructor. Generate realistic, detailed, delicious recipes in valid JSON according to the requested schema.",
       },
+      { role: "user", content: prompt },
     ],
-    generationConfig: {
-      responseMimeType: "application/json",
-      temperature: 0.6,
+    temperature: 0.6,
+    json: true,
+    validate: (recipe) => {
+      if (!recipe || typeof recipe !== "object" || Array.isArray(recipe) || !recipe.title) {
+        throw new Error("recipe is missing a title");
+      }
     },
   });
+
+  return data;
 }
 
 /**
- * Contextual recipe cooking assistant conversation via Gemini.
+ * Contextual recipe cooking assistant conversation through the LLM gateway.
  */
 export async function chatAboutRecipeWithAI({
   recipe,
@@ -703,47 +467,19 @@ If recipe_update:
 }
 `;
 
-  let rawResponse = null;
-
-  // 1. Try Groq as primary LLM provider if GROQ_API_KEY is configured
-  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
-    try {
-      rawResponse = await callGroqApi({
-        messages: [
-          {
-            role: "system",
-            content: "You are ChefMind AI, the executive chef who crafted this recipe. Chat with the home cook and return JSON matching the instructions.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        models: [GROQ_PRIMARY_MODEL, ...GROQ_FALLBACK_MODELS],
-        temperature: 0.5,
-        jsonMode: true,
-        returnRawText: true,
-      });
-    } catch (groqErr) {
-      console.warn(`[AI Provider Fallback] Groq recipe chat failed (${groqErr.message}). Cascading to Google Gemini...`);
-    }
-  }
-
-  // 2. Primary fallback: Google Gemini API
-  if (!rawResponse) {
-    rawResponse = await callGeminiApi({
-      contents: [
-        {
-          parts: [{ text: prompt }],
-        },
-      ],
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.5,
+  const { data: rawResponse } = await callLLM({
+    task: "text",
+    messages: [
+      {
+        role: "system",
+        content: "You are ChefMind AI, the executive chef who crafted this recipe. Chat with the home cook and return JSON matching the instructions.",
       },
-      returnRawText: true,
-    });
-  }
+      { role: "user", content: prompt },
+    ],
+    temperature: 0.5,
+    json: true,
+    parse: (text) => text,
+  });
 
   try {
     return parseCleanJson(rawResponse);

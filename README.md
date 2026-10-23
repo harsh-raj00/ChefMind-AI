@@ -86,7 +86,7 @@ Whether you **type** your ingredients, **speak** them aloud, or **snap a picture
 
 ### 📸 Multimodal Vision Pantry Detection
 * **Camera & Multi-Image Ingestion**: Capture live photos directly via your phone/laptop camera or upload up to 5 pantry photos simultaneously.
-* **Gemini Vision Analysis**: Leverages Gemini Vision with custom confidence thresholds to detect ingredients, flag uncertain items, and provide visual cooking tips.
+* **AI Vision Analysis**: Leverages Groq Qwen 3.8 27B vision (with Gemini Vision fallback) and custom confidence thresholds to detect ingredients, flag uncertain items, and provide visual cooking tips.
 * **Human-in-the-Loop Confirmation**: Detected ingredients flow into an interactive review tray where you can rename, adjust quantities, add forgotten spices, or delete mistaken items before generating.
 
 ### 🎙️ Hands-Free Voice Input
@@ -148,11 +148,11 @@ flowchart TB
         direction TB
         Chain["🔄 Intelligent Provider Cascade"]
         subgraph Groq_Tier ["⚡ Primary: Groq Cloud (Ultra-Fast)"]
-            G1["openai/gpt-oss-120b (500 t/s)"]
+            G1["openai/gpt-oss-120b "]
             G2["llama-3.3-70b-versatile"]
-            G3["openai/gpt-oss-20b (1000 t/s)"]
+            G3["openai/gpt-oss-20b "]
             G4["llama-3.1-8b-instant"]
-            GV["llama-3.2-11b-vision"]
+            GV["qwen3.8-27b (vision)"]
         end
         subgraph Gemini_Tier ["🛡️ Fallback: Google Gemini API"]
             M1["Gemini 3.8 Flash"]
@@ -176,19 +176,29 @@ flowchart TB
     Controllers <== "Mongoose ODM" ==> Database
 ```
 
+### 🧭 LLM Gateway Layer
+Every model call goes through one provider-agnostic gateway ([`backend/services/llmGateway.js`](backend/services/llmGateway.js)):
+* **Pluggable external gateway:** Set `LLM_GATEWAY_URL` to route through any OpenAI-compatible gateway (Cloudflare AI Gateway, Portkey, OpenRouter). Direct Groq and Gemini stay configured as automatic fallbacks.
+* **Bounded latency:** One overall deadline (`LLM_DEADLINE_MS`, default 55s) caps the whole cascade, so a request can never outlive the HTTP timeout.
+* **Smart error routing:** `429`/`5xx`/timeouts try the next model; `401`/`403` skip the whole provider; retired models (`404`) are skipped.
+* **Circuit breaker:** A model that fails 3 times in a row is deprioritized for 60s, so it stops adding latency to every request.
+* **Output validation failover:** A malformed recipe or vision payload fails over to the next model, just like an HTTP error.
+* **Observability:** Structured per-attempt logs, plus per-model latency, token usage and failure metrics at `GET /api/health/ai` (opt-in via `LLM_STATS_TOKEN`).
+* **Secret redaction:** Provider keys are removed from every error message that leaves the gateway.
+
 ### ⚡ Dual-Engine AI Cascade: Groq (Primary) ➔ Google Gemini (Fallback)
 ChefMind AI uses an intelligent dual-engine architecture prioritizing blisteringly fast inference speeds and zero-downtime reliability:
-1. **Primary Provider (Groq Cloud):** Dispatches requests to Groq's high-speed LPU inference engine (`openai/gpt-oss-120b` @ 500 t/s primary, with `llama-3.3-70b-versatile`, `openai/gpt-oss-20b` @ 1,000 t/s, and `llama-3.1-8b-instant` failovers; `llama-3.2-11b-vision-preview` for multi-modal pantry vision) with native JSON mode and 25-second timeouts.
+1. **Primary Provider (Groq Cloud):** Dispatches requests to Groq's high-speed LPU inference engine (`openai/gpt-oss-120b` primary, with `llama-3.3-70b-versatile`, `openai/gpt-oss-20b`  and `llama-3.1-8b-instant` failovers; `qwen/qwen3.8-27b` for multi-modal pantry vision) with native JSON mode and 25-second per-attempt timeouts.
 2. **Resilient Fallback (Google Gemini API):** If Groq encounters rate limits (`429`), upstream load (`503`), network timeouts, or unconfigured keys, ChefMind immediately and invisibly cascades to Google Gemini (`gemini-3.8-flash` ➔ `gemini-3.7-flash` ➔ `gemini-3.5-flash`), guaranteeing 100% operational availability.
 
 ```
 ┌──────────────────────────────────────┐      fallback on 429/503/timeout      ┌──────────────────────────────────────┐
 │  ⚡ Groq Cloud (Primary Engine)      │ ────────────────────────────────────► │  🛡️ Google Gemini (Fallback Engine)  │
-│  • openai/gpt-oss-120b (500 t/s)     │                                       │  • gemini-3.8-flash (Ultra-low lat)  │
+│  • openai/gpt-oss-120b     │                                       │  • gemini-3.8-flash (Ultra-low lat)  │
 │  • llama-3.3-70b-versatile (Reason)  │                                       │  • gemini-3.7-flash (Reasoning)      │
-│  • openai/gpt-oss-20b (1,000 t/s)    │                                       │  • gemini-3.5-flash (Resilience)     │
+│  • openai/gpt-oss-20b   │                                       │  • gemini-3.5-flash (Resilience)     │
 │  • llama-3.1-8b-instant (Fast Fail)  │                                       │                                      │
-│  • llama-3.2-11b-vision (Multi-Image)│                                       │                                      │
+│  • qwen3.8-27b (Multi-Image Vision)  │                                       │                                      │
 └──────────────────────────────────────┘                                       └──────────────────────────────────────┘
 ```
 
@@ -201,9 +211,9 @@ ChefMind AI uses an intelligent dual-engine architecture prioritizing blistering
 | **Frontend** | **React 19** · **Vite 8** | Modern Vanilla CSS, Web Speech API, MediaDevices Camera API, Lucide-style SVG icons |
 | **Backend** | **Node.js 20/22** · **Express 5** | Native ES Modules, Multer (multipart), Express Rate Limit, Native `fetch` |
 | **Database** | **MongoDB Atlas** | Mongoose 9 ODM with schema validation, indexes, and strict user-scoping |
-| **Artificial Intelligence** | **Groq Cloud** & **Google Gemini** | Groq (`openai/gpt-oss-120b`, `llama-3.3-70b`, `openai/gpt-oss-20b`, `llama-3.1-8b`, `llama-3.2-vision`) with fallback to Gemini (`3.8/3.7/3.5 Flash`) |
+| **Artificial Intelligence** | **Groq Cloud** & **Google Gemini** | Groq (`openai/gpt-oss-120b`, `llama-3.3-70b`, `openai/gpt-oss-20b`, `llama-3.1-8b`, `qwen3.8-27b` vision) with fallback to Gemini (`3.8/3.7/3.5 Flash`) |
 | **Security & Auth** | **JWT** · **bcryptjs** | Custom security headers, CORS protection, multi-tier rate limiters, magic byte inspection |
-| **Testing & CI/CD** | **node:test** · **GitHub Actions** | Automated CI pipeline on Node 20 & 22 (70 unit & integration tests, ESLint, production build) |
+| **Testing & CI/CD** | **node:test** · **GitHub Actions** | Automated CI pipeline on Node 20 & 22 (78 unit & integration tests, ESLint, production build) |
 
 ---
 
@@ -279,7 +289,7 @@ Run all root project commands with ease:
 |---|---|
 | `npm run dev:backend` | Starts the Express API server with native Node watch mode (`node --watch`) |
 | `npm run dev:frontend` | Starts Vite client server with Instant Hot Module Replacement (HMR) |
-| `npm test` | Runs the full 69-suite backend unit and integration test suite (`node:test`) |
+| `npm test` | Runs the full 78-test backend unit and integration suite (`node:test`) |
 | `npm run lint:frontend` | Runs ESLint across all React JSX and utility files |
 | `npm run build:frontend` | Compiles the frontend into an optimized, minified production bundle in `frontend/dist` |
 | `npm start` | Launches the production Express API server |
@@ -295,8 +305,8 @@ ChefMind-AI/
 │   ├── middleware/              # JWT auth · rate limiters · file upload validators
 │   ├── models/                  # Mongoose models (User, Recipe)
 │   ├── routes/                  # Express route routers
-│   ├── services/                # Gemini client, prompt templates, model fallback chain
-│   ├── tests/                   # 69 automated node:test suites
+│   ├── services/                # llmGateway (routing, fallback, metrics) · aiService (prompts, validation)
+│   ├── tests/                   # 78 automated node:test cases (+ hermetic setup.js)
 │   ├── app.js                   # Express application setup
 │   └── server.js                # Server bootstrap & database connection
 ├── frontend/

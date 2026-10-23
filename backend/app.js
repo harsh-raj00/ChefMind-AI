@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import express from "express";
 import mongoose from "mongoose";
 import multer from "multer";
@@ -5,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import recipeRoutes from "./routes/recipeRoutes.js";
 import ingredientRoutes from "./routes/ingredientRoutes.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
+import { getLLMStats } from "./services/llmGateway.js";
 
 const app = express();
 
@@ -97,6 +99,22 @@ app.get("/health", getHealthStatus);
 app.get("/health/ready", getReadinessStatus);
 app.get("/api/health", getHealthStatus);
 app.get("/api/health/ready", getReadinessStatus);
+
+// LLM gateway observability (per-model latency, tokens, failures, circuit state).
+// Disabled unless LLM_STATS_TOKEN is set; callers must send it as a Bearer token.
+app.get("/api/health/ai", apiLimiter, (req, res) => {
+  const statsToken = process.env.LLM_STATS_TOKEN?.trim();
+  const provided = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+  if (!statsToken) {
+    return res.status(404).json({ success: false, message: "Not found." });
+  }
+  const expected = Buffer.from(statsToken);
+  const actual = Buffer.from(provided);
+  if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) {
+    return res.status(401).json({ success: false, message: "Unauthorized." });
+  }
+  return res.json({ success: true, ...getLLMStats(), timestamp: new Date().toISOString() });
+});
 
 // General API Rate Limiting on /api
 app.use("/api", apiLimiter);

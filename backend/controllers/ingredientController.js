@@ -1,4 +1,4 @@
-import { analyzeImageIngredients } from "../services/geminiService.js";
+import { analyzeImageIngredients } from "../services/aiService.js";
 
 /**
  * Validate and echo plain text ingredients.

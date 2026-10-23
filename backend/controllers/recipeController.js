@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Recipe from "../models/Recipe.js";
-import { generateRecipeWithAI, chatAboutRecipeWithAI } from "../services/geminiService.js";
+import { generateRecipeWithAI, chatAboutRecipeWithAI } from "../services/aiService.js";
 
 /**
  * Sanitizes error messages to protect sensitive keys, paths, and internal details.

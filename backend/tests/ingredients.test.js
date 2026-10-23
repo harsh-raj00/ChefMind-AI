@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import http from "node:http";
 import jwt from "jsonwebtoken";
 import app from "../app.js";
-import { validateVisionResponse } from "../services/geminiService.js";
+import { validateVisionResponse } from "../services/aiService.js";
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-jwt-secret-key-12345";
 const testToken = jwt.sign({ userId: "507f1f77bcf86cd799439011" }, process.env.JWT_SECRET);
